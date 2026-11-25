@@ -2,6 +2,13 @@
 
 <!-- A versão mais nova fica em cima. O texto da primeira seção aparece na tela de atualização do app. -->
 
+## 1.1.0
+
+- Janela de configurações nova: menu lateral, seções em cartões, interruptores e opções que só aparecem quando fazem sentido
+- Estilos prontos em botões de um clique
+- Link para a galeria de looks do mod (lyrics.remake.lol) e créditos ao autor, FireStund
+- Nova página "Sobre" com versão, atualizações e créditos
+
 ## 1.0.2
 
 - Corrige a atualização automática: não abre mais uma janela preta e não trava esperando o app fechar
