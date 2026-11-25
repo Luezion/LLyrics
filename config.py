@@ -186,6 +186,9 @@ DEFAULTS = {
     "widget_opacity": 0.9,
     # Monitor
     "screen_index": 0,
+    # Atualizações
+    "auto_update": True,
+    "skip_version": "",
 }
 
 

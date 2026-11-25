@@ -1,0 +1,82 @@
+# Gera o LLyrics.exe e publica uma Release sempre que a versão em version.py muda.
+# O app de todo mundo vê a Release nova e mostra a tela de atualização.
+name: Gerar exe e publicar versão
+
+on:
+  push:
+    branches: [main]
+    paths: ["version.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ler a versão
+        id: v
+        shell: pwsh
+        run: |
+          $m = Select-String -Path version.py -Pattern '__version__\s*=\s*"([^"]+)"'
+          $v = $m.Matches[0].Groups[1].Value
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Versão: $v"
+
+      - name: Ver se essa versão já foi publicada
+        id: exists
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "v${{ steps.v.outputs.version }}" --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) { "skip=true" >> $env:GITHUB_OUTPUT; Write-Host "Já existe, nada a fazer." }
+          else { "skip=false" >> $env:GITHUB_OUTPUT }
+          exit 0
+
+      - uses: actions/setup-python@v5
+        if: steps.exists.outputs.skip != 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        if: steps.exists.outputs.skip != 'true'
+        run: python -m pip install -r requirements.txt pyinstaller
+
+      - name: Gerar LLyrics.exe
+        if: steps.exists.outputs.skip != 'true'
+        run: >
+          python -m PyInstaller --noconfirm --clean --windowed --name LLyrics --icon icon.ico
+          --add-data "fonts;fonts" --add-data "icon.png;." --collect-submodules winrt main.py
+
+      - name: Compactar
+        if: steps.exists.outputs.skip != 'true'
+        shell: pwsh
+        run: |
+          Copy-Item LEIA-ME.txt dist/LLyrics/
+          Compress-Archive -Path dist/LLyrics/* -DestinationPath LLyrics-windows.zip
+
+      - name: Notas da versão
+        if: steps.exists.outputs.skip != 'true'
+        shell: pwsh
+        run: |
+          $lines = Get-Content NOVIDADES.md -Encoding UTF8
+          $out = @(); $inside = $false
+          foreach ($l in $lines) {
+            if ($l -match '^## ') { if ($inside) { break } else { $inside = $true; continue } }
+            if ($inside) { $out += $l }
+          }
+          if ($out.Count -eq 0) { $out = @("Melhorias e correções.") }
+          $out | Set-Content notas.md -Encoding UTF8
+
+      - name: Publicar a versão
+        if: steps.exists.outputs.skip != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.v.outputs.version }}
+          name: LLyrics ${{ steps.v.outputs.version }}
+          body_path: notas.md
+          files: LLyrics-windows.zip

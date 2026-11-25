@@ -8,7 +8,7 @@ Atalhos:
 import os
 import sys
 
-from PySide6.QtCore import QLockFile, QRectF, Qt
+from PySide6.QtCore import QLockFile, QRectF, Qt, QTimer
 from PySide6.QtGui import QAction, QColor, QFont, QIcon, QLinearGradient, QPainter, QPixmap
 from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon
 
@@ -17,6 +17,8 @@ import winutil
 from config import CONFIG_FILE, Config, data_dir, resource_path
 from overlay import Controller
 from settings_ui import SettingsWindow
+from updater import Updater
+from version import __version__
 
 
 def make_icon():
@@ -75,7 +77,7 @@ def main():
 
     # bandeja
     tray = QSystemTrayIcon(icon)
-    tray.setToolTip("LLyrics")
+    tray.setToolTip(f"LLyrics {__version__}")
     menu = QMenu()
     act_toggle = QAction("Mostrar/esconder  (Ctrl+Shift+L)")
     act_toggle.triggered.connect(ctl.toggle_hidden)
@@ -83,9 +85,10 @@ def main():
     act_move.triggered.connect(ctl.toggle_edit)
     act_settings = QAction("Configurações…  (Ctrl+Shift+O)")
     act_settings.triggered.connect(open_settings)
+    act_update = QAction("Procurar atualizações")
     act_quit = QAction("Sair")
     act_quit.triggered.connect(app.quit)
-    for a in (act_toggle, act_move, act_settings):
+    for a in (act_toggle, act_move, act_settings, act_update):
         menu.addAction(a)
     menu.addSeparator()
     menu.addAction(act_quit)
@@ -93,6 +96,15 @@ def main():
     tray.activated.connect(lambda r: open_settings() if r in (QSystemTrayIcon.Trigger,
                                                                QSystemTrayIcon.DoubleClick) else None)
     tray.show()
+
+    # atualizações automáticas
+    updater = Updater(cfg, app.quit, lambda msg: tray.showMessage("LLyrics", msg, icon, 5000))
+    ctl.updater = updater
+    act_update.triggered.connect(lambda: updater.check(manual=True))
+    QTimer.singleShot(5000, updater.check)
+    update_timer = QTimer()
+    update_timer.timeout.connect(updater.check)
+    update_timer.start(6 * 60 * 60 * 1000)
 
     # atalhos globais
     hk = winutil.HotkeyFilter()

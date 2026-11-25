@@ -27,14 +27,23 @@ Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra d
 - Fixa (arraste com **Ctrl+Shift+K**) ou **aleatória a cada linha**
 - Opção para **nunca aparecer no centro da tela**, para não cobrir a mira em jogos de tiro
 
-## Como usar
+## Baixar
+
+**[⬇ Baixar a versão mais recente](https://github.com/Luezion/LLyrics/releases/latest/download/LLyrics-windows.zip)** (Windows 10/11)
+
+1. Extraia o zip numa pasta sua (ex.: `Documentos\LLyrics`). Evite `Arquivos de Programas`, senão o app não consegue se atualizar sozinho.
+2. Abra o `LLyrics.exe`. O app fica na bandeja, perto do relógio (ícone ♪).
+3. Toque uma música.
+
+O Windows pode mostrar "O Windows protegeu o computador", porque o app não tem assinatura digital paga. Clique em **Mais informações → Executar assim mesmo**.
+
+Quando sair uma versão nova, o app mostra uma tela para atualizar com um clique.
+
+### Rodar pelo código
 
 1. Instale o [Python 3.10+](https://www.python.org/downloads/) e marque **"Add python.exe to PATH"**
-2. Baixe este repositório (**Code → Download ZIP**) e extraia
-3. Dê dois cliques em `Iniciar.bat`. Na primeira vez ele instala as dependências (1 a 2 minutos).
-4. Toque uma música. O app fica na bandeja, perto do relógio (ícone ♪).
-
-Para gerar um `.exe`: rode `Iniciar.bat` uma vez e depois `Gerar_exe.bat`. O app fica em `dist\LLyrics\LLyrics.exe`.
+2. Baixe o código (**Code → Download ZIP**) e extraia
+3. Dê dois cliques em `Iniciar.bat`
 
 ### Atalhos
 
@@ -50,6 +59,12 @@ Coloque o jogo em **janela em tela cheia** (borderless). No modo tela cheia excl
 
 O LLyrics não mexe no jogo: não lê memória, não injeta nada e não instala driver. São só janelas transparentes do Windows, como o overlay do Discord. Ainda assim, não há aprovação oficial de nenhuma desenvolvedora de jogos para apps de terceiros; use por sua conta.
 
+## Publicar uma versão nova
+
+1. Escreva as novidades no topo do `NOVIDADES.md` (`## 1.1.0` e a lista embaixo)
+2. Mude o número em `version.py`
+3. Envie para o `main`. O GitHub Actions gera o `.exe`, cria a Release e todo mundo recebe a tela de atualização.
+
 ## Estrutura
 
 | Arquivo | O que faz |
@@ -62,6 +77,8 @@ O LLyrics não mexe no jogo: não lê memória, não injeta nada e não instala 
 | `settings_ui.py` | Janela de configurações |
 | `looks.py` | Importa looks do site do mod |
 | `config.py` | Opções e valores padrão |
+| `updater.py` | Procura versão nova e atualiza o app |
+| `version.py` | Número da versão |
 | `winutil.py` | Clique atravessando a janela, sempre no topo, atalhos globais |
 
 ## Créditos

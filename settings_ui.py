@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (QCheckBox, QColorDialog, QComboBox, QFormLayout, 
                                QLabel, QLineEdit, QPushButton, QScrollArea, QSlider, QTabWidget, QVBoxLayout, QWidget)
 
 import looks
+from version import __version__
 from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, EXITS, FONTS, IDLES, LAYOUTS, PARTY_EFFECTS,
                     POSITION_MODES, WIDGET_POSITIONS)
 
@@ -89,6 +90,7 @@ class SettingsWindow(QWidget):
             ("sync_offset", "Ajuste de sincronia", ("slider", -3.0, 3.0, 0.05, "s")),
             ("screen_index", "Monitor", ("choice", screens)),
             ("fps", "Quadros por segundo", ("choice", [(30, "30"), (60, "60"), (120, "120"), (144, "144")])),
+            ("auto_update", "Procurar atualizações sozinho", "bool"),
         ], "Aleatória: cada linha nova aparece num lugar diferente da tela.\n"
            "Desligue \"Pode aparecer no centro\" em jogos de tiro para a letra nunca cobrir a mira "
            "(a área livre aumenta ou diminui no controle acima).\n"
@@ -167,6 +169,9 @@ class SettingsWindow(QWidget):
         ], "Dica: use Ctrl+Shift+K para arrastar a letra e o widget para onde quiser."), "Widget")
 
         btns = QHBoxLayout()
+        upd = QPushButton(f"Atualizações (v{__version__})")
+        upd.clicked.connect(lambda: getattr(ctl, "updater", None) and ctl.updater.check(manual=True))
+        btns.addWidget(upd)
         move = QPushButton("Mover janelas")
         move.clicked.connect(ctl.toggle_edit)
         reset = QPushButton("Restaurar padrão")
