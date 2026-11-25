@@ -1,88 +1,99 @@
 # LLyrics
 
-Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra da música que está tocando por cima de qualquer jogo, com animações no estilo do mod de Minecraft *Show the Lyrics*.
+**English** · [Español](README.es.md) · [Português](README.pt-BR.md)
 
-![Prévia](docs/previa.png)
+Synced lyrics overlay for Windows, made for gaming. It shows the lyrics of the song you're playing on top of any game, with animations in the style of the Minecraft mod *Show the Lyrics*.
 
-## O que ele faz
+![Preview](docs/previa.png)
 
-- Lê o que está tocando em qualquer player que aparece no controle de mídia do Windows (Spotify, YouTube e YouTube Music no navegador, Apple Music, Deezer, VLC…)
-- Busca a letra sincronizada no [lrclib.net](https://lrclib.net)
-- Desenha a letra numa janela transparente, sempre por cima, que **deixa o clique passar** para o jogo
-- Widget "tocando agora" com capa, título, artista e barra de progresso
+## Download
 
-### Estilos
+**[⬇ Download the latest version](https://github.com/Luezion/LLyrics/releases/latest/download/LLyrics-windows.zip)** (Windows 10/11)
 
-- Animações de entrada: máquina de escrever (no ritmo do canto), queda, subida, palavras, esmaecer, pop, onda
-- Saídas: igual à entrada, esmaecer, levada pelo vento
-- Layouts: linhas, **pilha** (palavras importantes grandes, pequenas menores), primeira palavra em destaque (com ou sem inclinação)
-- Karaokê, contagem nos trechos instrumentais, linha anterior e prévia da próxima
-- Cor da capa do álbum, paletas prontas, arco-íris, cor própria, **degradê de 2 ou 3 cores**, arco-íris correndo
-- Movimento parado (tremer, onda, pulinho, pulsar, flutuar, balançar), brilhinhos e modo festa
-- Contorno, sombra, brilho e fundo; 12 fontes livres (Google Fonts)
-- Estilos prontos, incluindo "Shake" e "Void Echoes", e importação de looks do site da comunidade do mod pelo código `STL-XXXXXX`
+1. Extract the zip into a folder of yours (e.g. `Documents\LLyrics`). Avoid `Program Files`, otherwise the app can't update itself.
+2. Open `LLyrics.exe`. The app lives in the tray, near the clock (♪ icon). No Python needed.
+3. Play a song.
 
-### Posição
+Windows may show "Windows protected your PC" because the app doesn't have a paid digital signature. Click **More info → Run anyway**.
 
-- Fixa (arraste com **Ctrl+Shift+K**) ou **aleatória a cada linha**
-- Opção para **nunca aparecer no centro da tela**, para não cobrir a mira em jogos de tiro
+When a new version comes out, the app shows a window to update with one click.
 
-## Baixar
+## Features
 
-**[⬇ Baixar a versão mais recente](https://github.com/Luezion/LLyrics/releases/latest/download/LLyrics-windows.zip)** (Windows 10/11)
+- Reads whatever is playing in any player that shows up in the Windows media controls (Spotify, YouTube and YouTube Music in the browser, Apple Music, Deezer, VLC…)
+- Fetches synced lyrics from [lrclib.net](https://lrclib.net)
+- Draws the lyrics in a transparent, always-on-top window that **lets clicks pass through** to the game
+- "Now playing" widget with cover, title, artist and progress bar
+- Available in **English, Español and Português (Brasil)**
 
-1. Extraia o zip numa pasta sua (ex.: `Documentos\LLyrics`). Evite `Arquivos de Programas`, senão o app não consegue se atualizar sozinho.
-2. Abra o `LLyrics.exe`. O app fica na bandeja, perto do relógio (ícone ♪).
-3. Toque uma música.
+### Styles
 
-O Windows pode mostrar "O Windows protegeu o computador", porque o app não tem assinatura digital paga. Clique em **Mais informações → Executar assim mesmo**.
+- Entrances: typewriter (synced to the singing), drop, rise, words, fade, pop, wave
+- Exits: same as entrance, fade, blown away
+- Layouts: lines, **stack** (key words big, little words small), first word highlighted (with or without tilt)
+- Karaoke, instrumental countdown, previous line and next line preview
+- Album cover colour, palettes, rainbow, custom colour, **2 or 3 colour gradients**, flowing rainbow
+- Idle motion (shake, wave, bounce, pulse, float, sway), sparkles and party mode
+- Outline, shadow, glow and background; 12 free fonts (Google Fonts)
+- Ready-made styles, including "Shake" and "Void Echoes", and importing looks from the mod's community site with a `STL-XXXXXX` code
 
-Quando sair uma versão nova, o app mostra uma tela para atualizar com um clique.
+### Position
 
-### Rodar pelo código
+- Fixed (drag it with **Ctrl+Shift+K**) or **random on every line**
+- Option to **never appear in the middle of the screen**, so it doesn't cover the crosshair in shooters
 
-1. Instale o [Python 3.10+](https://www.python.org/downloads/) e marque **"Add python.exe to PATH"**
-2. Baixe o código (**Code → Download ZIP**) e extraia
-3. Dê dois cliques em `Iniciar.bat`
+### Shortcuts
 
-### Atalhos
+Default shortcuts. You can change them in **Settings → Shortcuts**.
 
-| Atalho | Ação |
+| Shortcut | Action |
 |---|---|
-| Ctrl+Shift+L | Mostrar/esconder |
-| Ctrl+Shift+K | Mover as janelas |
-| Ctrl+Shift+O | Configurações |
+| Ctrl+Shift+L | Show/hide |
+| Ctrl+Shift+K | Move the windows |
+| Ctrl+Shift+O | Settings |
 
-## Em jogos (Valorant e outros)
+## In games (Valorant and others)
 
-Coloque o jogo em **janela em tela cheia** (borderless). No modo tela cheia exclusiva, nenhum overlay aparece por cima.
+Set the game to **windowed fullscreen** (borderless). In exclusive fullscreen no overlay can appear on top.
 
-O LLyrics não mexe no jogo: não lê memória, não injeta nada e não instala driver. São só janelas transparentes do Windows, como o overlay do Discord. Ainda assim, não há aprovação oficial de nenhuma desenvolvedora de jogos para apps de terceiros; use por sua conta.
+LLyrics doesn't touch the game: it doesn't read memory, inject anything or install drivers. It's just transparent Windows windows, like the Discord overlay. Still, there's no official approval from any game developer for third-party apps; use it at your own risk.
 
-## Publicar uma versão nova
+## Run from source
 
-1. Escreva as novidades no topo do `NOVIDADES.md` (`## 1.1.0` e a lista embaixo)
-2. Mude o número em `version.py`
-3. Envie para o `main`. O GitHub Actions gera o `.exe`, cria a Release e todo mundo recebe a tela de atualização.
+1. Install [Python 3.10+](https://www.python.org/downloads/) and tick **"Add python.exe to PATH"**
+2. Download the code (**Code → Download ZIP**) and extract it
+3. Double-click `Iniciar.bat`
 
-## Estrutura
+## Releasing a new version
 
-| Arquivo | O que faz |
+1. Write the changes at the top of `CHANGELOG.md` (`## 1.3.0`, then `### English`, `### Español` and `### Português`)
+2. Change the number in `version.py`
+3. Push to `main`. GitHub Actions builds the `.exe`, creates the Release, and everyone gets the update window in their language.
+
+## Translations
+
+All the app's text lives in `i18n.py`. To add a language, copy the English column, translate it and add it to `LANGUAGES`.
+
+## Project layout
+
+| File | What it does |
 |---|---|
-| `main.py` | Inicia o app, bandeja e atalhos |
-| `media.py` | Lê o player pelo Windows (SMTC) |
-| `lyrics.py` | Busca e lê letras LRC do lrclib |
-| `render.py` | Desenho da letra, layouts, animações e widget |
-| `overlay.py` | Janelas do overlay e posição |
-| `settings_ui.py` | Janela de configurações |
-| `looks.py` | Importa looks do site do mod |
-| `config.py` | Opções e valores padrão |
-| `updater.py` | Procura versão nova e atualiza o app |
-| `version.py` | Número da versão |
-| `winutil.py` | Clique atravessando a janela, sempre no topo, atalhos globais |
+| `main.py` | Starts the app, tray and shortcuts |
+| `media.py` | Reads the player through Windows (SMTC) |
+| `lyrics.py` | Fetches and parses LRC lyrics from lrclib |
+| `render.py` | Draws the lyrics, layouts, animations and widget |
+| `overlay.py` | Overlay windows and positioning |
+| `settings_ui.py` | Settings window |
+| `i18n.py` | Translations (English, Español, Português) |
+| `hotkeys.py` | Configurable global shortcuts |
+| `looks.py` | Imports looks from the mod's site |
+| `updater.py` | Checks for a new version and updates the app |
+| `config.py` | Options and defaults |
+| `version.py` | Version number |
+| `winutil.py` | Click-through, always on top, global hotkeys, start with Windows |
 
-## Créditos
+## Credits
 
-- Inspirado no mod *Show the Lyrics* (FireStund). Código escrito do zero; nenhum código do mod foi usado.
-- Letras: [lrclib.net](https://lrclib.net)
-- Fontes: Google Fonts, licença SIL OFL (`fonts/OFL-licenca-fontes.txt`)
+- Inspired by the Minecraft mod *Show the Lyrics* by FireStund. Community looks: [lyrics.remake.lol](https://lyrics.remake.lol/). LLyrics was written from scratch; no code from the mod was used.
+- Lyrics: [lrclib.net](https://lrclib.net)
+- Fonts: Google Fonts, SIL OFL (`fonts/OFL-licenca-fontes.txt`)

@@ -20,6 +20,7 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QProgressBar, QPushButton,
                                QTextBrowser, QVBoxLayout)
 
+from i18n import lang, tr
 from version import UPDATE_REPO, __version__
 
 API = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
@@ -64,6 +65,28 @@ def latest_release():
         "url": data.get("html_url") or f"https://github.com/{UPDATE_REPO}/releases/latest",
         "download": download,
     }
+
+
+_LANG_HEADINGS = {"en": "english", "es": "español", "pt": "português"}
+
+
+def localized_notes(body):
+    """Se as notas tiverem seções '### English' / '### Español' / '### Português', mostra só a do idioma."""
+    if "###" not in (body or ""):
+        return body
+    want = _LANG_HEADINGS.get(lang(), "english")
+    sections, cur = {}, None
+    for line in body.splitlines():
+        if line.startswith("### "):
+            cur = line[4:].strip().lower()
+            sections[cur] = []
+        elif cur is not None:
+            sections[cur].append(line)
+    for name, lines in sections.items():
+        if name.startswith(want):
+            return "\n".join(lines).strip()
+    first = sections.get("english") or next(iter(sections.values()), [])
+    return "\n".join(first).strip() or body
 
 
 class _Signals(QObject):
@@ -115,11 +138,11 @@ def _download_and_prepare(url, sig):
         for name in z.namelist():  # proteção contra caminhos estranhos no zip
             target = os.path.realpath(os.path.join(out, name))
             if not target.startswith(os.path.realpath(out) + os.sep) and target != os.path.realpath(out):
-                raise OSError("arquivo de atualização inválido")
+                raise OSError(tr("upd.bad_file"))
         z.extractall(out)
     src = _find_root(out, "LLyrics.exe" if FROZEN else "main.py")
     if not src:
-        raise OSError("a atualização não tem os arquivos esperados")
+        raise OSError(tr("upd.missing_files"))
     return tmp, src
 
 
@@ -192,20 +215,20 @@ class UpdateDialog(QDialog):
         if quiet:  # checagem automática: não rouba o foco do jogo
             self.setAttribute(Qt.WA_ShowWithoutActivating, True)
         self.release, self.cfg, self.on_quit = release, cfg, on_quit
-        self.setWindowTitle("LLyrics — atualização")
+        self.setWindowTitle(tr("upd.window"))
         self.setStyleSheet(STYLE)
         self.resize(480, 420)
         v = QVBoxLayout(self)
         v.setContentsMargins(20, 18, 20, 18)
-        t = QLabel(f"Nova versão do LLyrics: {release['version']}")
+        t = QLabel(tr("upd.new", v=release["version"]))
         t.setObjectName("title")
         v.addWidget(t)
-        s = QLabel(f"Você está usando a {__version__}. Novidades:")
+        s = QLabel(tr("upd.current", v=__version__))
         s.setObjectName("sub")
         v.addWidget(s)
         notes = QTextBrowser()
         notes.setOpenExternalLinks(True)
-        notes.setMarkdown(release["notes"] or "Melhorias e correções.")
+        notes.setMarkdown(localized_notes(release["notes"]) or tr("upd.default_notes"))
         v.addWidget(notes, 1)
         self.bar = QProgressBar()
         self.bar.setVisible(False)
@@ -215,9 +238,9 @@ class UpdateDialog(QDialog):
         self.msg.setWordWrap(True)
         v.addWidget(self.msg)
         row = QHBoxLayout()
-        self.skip_btn = QPushButton("Pular esta versão")
-        self.later_btn = QPushButton("Depois")
-        self.go_btn = QPushButton("Atualizar agora")
+        self.skip_btn = QPushButton(tr("upd.skip"))
+        self.later_btn = QPushButton(tr("upd.later"))
+        self.go_btn = QPushButton(tr("upd.now"))
         self.go_btn.setObjectName("primary")
         row.addWidget(self.skip_btn)
         row.addStretch(1)
@@ -228,11 +251,10 @@ class UpdateDialog(QDialog):
         self.later_btn.clicked.connect(self.close)
         self.go_btn.clicked.connect(self._update)
         if not release.get("download"):
-            self.go_btn.setText("Abrir página de download")
+            self.go_btn.setText(tr("upd.open_page"))
         elif not can_write_app_dir():
-            self.msg.setText("Não tenho permissão para trocar os arquivos na pasta do app "
-                             "(ele está em Arquivos de Programas?). Use \"Abrir página\" e baixe manualmente.")
-            self.go_btn.setText("Abrir página de download")
+            self.msg.setText(tr("upd.no_write"))
+            self.go_btn.setText(tr("upd.open_page"))
             self.release = dict(release, download=None)
 
     def _skip(self):
@@ -250,7 +272,7 @@ class UpdateDialog(QDialog):
             b.setEnabled(False)
         self.bar.setVisible(True)
         self.bar.setRange(0, 0)
-        self.msg.setText("Baixando…")
+        self.msg.setText(tr("upd.downloading"))
         sig = _Signals(self)
         sig.progress.connect(self._progress)
         sig.finished.connect(self._done)
@@ -269,18 +291,18 @@ class UpdateDialog(QDialog):
         if total > 0:
             self.bar.setRange(0, total)
             self.bar.setValue(got)
-            self.msg.setText(f"Baixando… {got / 1e6:.1f} de {total / 1e6:.1f} MB")
+            self.msg.setText(tr("upd.progress", a=got / 1e6, b=total / 1e6))
         else:
-            self.msg.setText(f"Baixando… {got / 1e6:.1f} MB")
+            self.msg.setText(tr("upd.progress_unknown", a=got / 1e6))
 
     def _done(self, ok, info):
         if not ok:
             self.bar.setVisible(False)
-            self.msg.setText(f"Não deu para atualizar: {info}")
+            self.msg.setText(tr("upd.failed", e=info))
             for b in (self.go_btn, self.later_btn, self.skip_btn):
                 b.setEnabled(True)
             return
-        self.msg.setText("Instalando e reabrindo o LLyrics…")
+        self.msg.setText(tr("upd.installing"))
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
         subprocess.Popen(["wscript.exe", "//B", "//Nologo", info], creationflags=flags, close_fds=True)
         self.on_quit()
@@ -306,9 +328,9 @@ class Updater(QObject):
                 self.show(rel, quiet=not manual)
             elif manual and self.notify:
                 if err:
-                    self.notify(f"Não consegui procurar atualizações agora ({err}).")
+                    self.notify(tr("upd.check_failed", e=err))
                 else:
-                    self.notify(f"Você já está na versão mais recente ({__version__}).")
+                    self.notify(tr("upd.up_to_date", v=__version__))
 
         self._sig = check_async(got)
 
@@ -323,7 +345,7 @@ class Updater(QObject):
         if quiet:
             self.dialog.lower()
             if self.notify:
-                self.notify(f"Nova versão {rel['version']} disponível. A janela de atualização está aberta.")
+                self.notify(tr("upd.available", v=rel["version"]))
         else:
             self.dialog.raise_()
             self.dialog.activateWindow()

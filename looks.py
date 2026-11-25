@@ -7,6 +7,8 @@ import re
 import urllib.error
 import urllib.request
 
+from i18n import tr
+
 SITE = "https://lyrics.remake.lol"
 
 _FONTS = {
@@ -39,7 +41,7 @@ def fetch_look(code):
     """Devolve (nome, autor, configurações já convertidas). Lança ValueError com mensagem amigável."""
     cid = parse_code(code)
     if not cid:
-        raise ValueError("Código inválido. Ele é parecido com STL-JMQZYC.")
+        raise ValueError(tr("look.bad_code"))
     req = urllib.request.Request(f"{SITE}/api/community/presets/{cid}",
                                  headers={"User-Agent": "LLyrics/1.0", "Accept": "application/json"})
     try:
@@ -47,10 +49,10 @@ def fetch_look(code):
             data = json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            raise ValueError("Não achei esse código no site.") from e
-        raise ValueError(f"O site respondeu com erro ({e.code}). Tente de novo depois.") from e
+            raise ValueError(tr("look.not_found")) from e
+        raise ValueError(tr("look.site_error", code=e.code)) from e
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
-        raise ValueError("Não consegui falar com o site. Confira sua internet.") from e
+        raise ValueError(tr("look.offline")) from e
     return data.get("name") or cid, data.get("author") or "", convert(data.get("settings") or {})
 
 

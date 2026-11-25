@@ -44,28 +44,16 @@ ACCENTS = {
 }
 RAINBOW = ["#FF7F6E", "#FFC857", "#FFF1D0", "#8DF2C4", "#A9E4FF", "#C4B3FF", "#E38CF2", "#FFB3C8"]
 
-ACCENT_CHOICES = [
-    ("album", "Álbum (cor da capa)"),
-    ("cream", "Creme"), ("honey", "Mel"), ("blush", "Rosado"), ("coral", "Coral"),
-    ("mint", "Menta"), ("ice", "Gelo"), ("lavender", "Lavanda"), ("orchid", "Orquídea"),
-    ("sage", "Sálvia"), ("slate", "Ardósia"),
-    ("rainbow", "Arco-íris"), ("custom", "Personalizada"),
-]
+# Listas de escolhas: (valor, chave de tradução em i18n.py)
+ACCENT_CHOICES = [(k, f"accent.{k}") for k in (
+    "album", "cream", "honey", "blush", "coral", "mint", "ice", "lavender", "orchid", "sage", "slate",
+    "rainbow", "custom")]
 
-ANIMATIONS = [
-    ("typewriter", "Máquina de escrever"),
-    ("drop", "Queda"),
-    ("rise", "Subida"),
-    ("words", "Palavras"),
-    ("fade", "Esmaecer"),
-    ("pop", "Pop"),
-    ("wave", "Onda"),
-    ("wave_down", "Onda para baixo"),
-]
+ANIMATIONS = [(k, f"anim.{k}") for k in ("typewriter", "drop", "rise", "words", "fade", "pop", "wave", "wave_down")]
 
-# (chave, nome exibido, arquivos) — arquivos ficam na pasta fonts/
+# (chave, nome exibido ou chave de tradução, arquivos) — arquivos ficam na pasta fonts/
 FONTS = [
-    ("pixelify", "Pixelify Sans (estilo Minecraft)", ["PixelifySans.ttf"]),
+    ("pixelify", "font.pixelify", ["PixelifySans.ttf"]),
     ("bebas", "Bebas Neue", ["BebasNeue-Regular.ttf"]),
     ("poppins", "Poppins", ["Poppins-Regular.ttf", "Poppins-Bold.ttf"]),
     ("montserrat", "Montserrat", ["Montserrat.ttf"]),
@@ -75,60 +63,27 @@ FONTS = [
     ("playfair", "Playfair Display", ["PlayfairDisplay.ttf"]),
     ("eagle_lake", "Eagle Lake", ["EagleLake-Regular.ttf"]),
     ("comic_relief", "Comic Relief", ["ComicRelief-Regular.ttf", "ComicRelief-Bold.ttf"]),
-    ("press_start", "Press Start 2P (pixel)", ["PressStart2P-Regular.ttf"]),
-    ("system", "Segoe UI (sistema)", []),
+    ("press_start", "Press Start 2P", ["PressStart2P-Regular.ttf"]),
+    ("system", "font.system", []),
 ]
 
-LAYOUTS = [
-    ("lines", "Linhas (normal)"),
-    ("stack", "Pilha (palavras grandes e pequenas)"),
-    ("words", "Primeira palavra em destaque"),
-    ("words_tilted", "Primeira palavra em destaque + palavras inclinadas"),
-]
+LAYOUTS = [(k, f"layout.{k}") for k in ("lines", "stack", "words", "words_tilted")]
+EXITS = [(k, f"exit.{k}") for k in ("auto", "fade", "drift")]
+COLOUR_MODES = [(k, f"colour.{k}") for k in ("solid", "gradient", "gradient3", "rainbow_flow")]
+IDLES = [(k, f"idle.{k}") for k in ("none", "shake", "wave", "bounce", "pulse", "float", "sway")]
+PARTY_EFFECTS = [(k, f"party.{k}") for k in ("both", "notes", "sparkles")]
+POSITION_MODES = [(k, f"posmode.{k}") for k in ("fixed", "random")]
+WIDGET_POSITIONS = [(k, f"wpos.{k}") for k in ("top_left", "top_right", "bottom_left", "bottom_right", "custom")]
 
-EXITS = [
-    ("auto", "Igual à entrada"),
-    ("fade", "Esmaecer"),
-    ("drift", "Levada pelo vento"),
-]
-
-COLOUR_MODES = [
-    ("solid", "Uma cor"),
-    ("gradient", "Degradê (duas cores)"),
-    ("gradient3", "Degradê (três cores)"),
-    ("rainbow_flow", "Arco-íris correndo"),
-]
-
-IDLES = [
-    ("none", "Nenhum"),
-    ("shake", "Tremer"),
-    ("wave", "Onda"),
-    ("bounce", "Pulinho"),
-    ("pulse", "Pulsar"),
-    ("float", "Flutuar"),
-    ("sway", "Balançar"),
-]
-
-PARTY_EFFECTS = [
-    ("both", "Notas e brilhos"),
-    ("notes", "Só notas"),
-    ("sparkles", "Só brilhos"),
-]
-
-POSITION_MODES = [
-    ("fixed", "Fixa (onde eu arrastar)"),
-    ("random", "Aleatória a cada linha"),
-]
-
-WIDGET_POSITIONS = [
-    ("top_left", "Superior esquerdo"),
-    ("top_right", "Superior direito"),
-    ("bottom_left", "Inferior esquerdo"),
-    ("bottom_right", "Inferior direito"),
-    ("custom", "Onde eu arrastar"),
-]
+HOTKEY_DEFAULTS = {
+    "hotkey_toggle": "Ctrl+Shift+L",
+    "hotkey_move": "Ctrl+Shift+K",
+    "hotkey_settings": "Ctrl+Shift+O",
+}
 
 DEFAULTS = {
+    "language": "en",
+    **HOTKEY_DEFAULTS,
     # Geral
     "show_lyrics": True,
     "hide_paused": True,

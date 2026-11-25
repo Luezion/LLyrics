@@ -8,10 +8,13 @@ from PySide6.QtWidgets import (QAbstractButton, QColorDialog, QComboBox, QFrame,
                                QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea,
                                QSizePolicy, QSlider, QStackedWidget, QVBoxLayout, QWidget)
 
+import hotkeys
+import i18n
 import looks
 import render
-from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, EXITS, FONTS, IDLES, LAYOUTS, PARTY_EFFECTS,
-                    POSITION_MODES, WIDGET_POSITIONS)
+from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, EXITS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
+                    PARTY_EFFECTS, POSITION_MODES, WIDGET_POSITIONS)
+from i18n import tr
 from version import UPDATE_REPO, __version__
 
 MOD_SITE = "https://lyrics.remake.lol/"
@@ -20,21 +23,23 @@ MOD_AUTHOR = "FireStund"
 _RESET_EXTRAS = dict(layout="lines", idle="none", colour_mode="solid", sparkle=False, party=False,
                      exit_animation="auto", letter_spacing=1.0, line_spacing=4)
 
-PRESETS = {
-    "Shake": looks.SHAKE,
-    "Void Echoes": looks.VOID_ECHOES,
-    "Neon karaokê": dict(font="bebas", uppercase=True, animation="typewriter", karaoke=True, glow=True,
-                         outline=True, drop_shadow=True, background=False, accent="album", letter_spacing=1.5),
-    "Minimalista": dict(font="poppins", uppercase=False, bold=True, animation="fade", karaoke=False, glow=False,
-                        outline=False, drop_shadow=True, background=True, accent="cream", letter_spacing=0),
-    "Retrô pixel": dict(font="press_start", uppercase=True, bold=False, animation="wave", karaoke=True,
-                        glow=False, outline=True, drop_shadow=True, background=False, accent="rainbow",
-                        letter_spacing=0, text_size=30),
-    "Elegante": dict(font="playfair", uppercase=False, bold=True, animation="rise", karaoke=False, glow=True,
-                     outline=False, drop_shadow=True, background=False, accent="honey", letter_spacing=0.5),
-    "Divertido": dict(font="pacifico", uppercase=False, bold=False, animation="pop", karaoke=True, glow=True,
-                      outline=True, drop_shadow=False, background=False, accent="orchid", letter_spacing=0),
-}
+PRESETS = [
+    ("Shake", looks.SHAKE),
+    ("Void Echoes", looks.VOID_ECHOES),
+    ("preset.neon", dict(font="bebas", uppercase=True, animation="typewriter", karaoke=True, glow=True,
+                         outline=True, drop_shadow=True, background=False, accent="album", letter_spacing=1.5)),
+    ("preset.minimal", dict(font="poppins", uppercase=False, bold=True, animation="fade", karaoke=False,
+                            glow=False, outline=False, drop_shadow=True, background=True, accent="cream",
+                            letter_spacing=0)),
+    ("preset.retro", dict(font="press_start", uppercase=True, bold=False, animation="wave", karaoke=True,
+                          glow=False, outline=True, drop_shadow=True, background=False, accent="rainbow",
+                          letter_spacing=0, text_size=30)),
+    ("preset.elegant", dict(font="playfair", uppercase=False, bold=True, animation="rise", karaoke=False,
+                            glow=True, outline=False, drop_shadow=True, background=False, accent="honey",
+                            letter_spacing=0.5)),
+    ("preset.fun", dict(font="pacifico", uppercase=False, bold=False, animation="pop", karaoke=True, glow=True,
+                        outline=True, drop_shadow=False, background=False, accent="orchid", letter_spacing=0)),
+]
 
 # Cores do tema
 BG = "#0F0F14"
@@ -181,6 +186,66 @@ class ColorButton(QPushButton):
         p.end()
 
 
+class HotkeyButton(QPushButton):
+    """Clique e aperte as teclas do novo atalho."""
+    captured = Signal(str)
+    message = Signal(str)
+
+    def __init__(self, ctl):
+        super().__init__()
+        self.ctl = ctl
+        self.value = ""
+        self.capturing = False
+        self.setCursor(Qt.PointingHandCursor)
+        self.setMinimumWidth(200)
+        self.clicked.connect(self.start)
+
+    def set_value(self, text):
+        self.value = text
+        if not self.capturing:
+            self.setText(text)
+
+    def start(self):
+        if self.capturing:
+            return
+        self.capturing = True
+        self.setText(tr("keys.press"))
+        self.setStyleSheet(f"border-color: {ACC}; color: {ACC};")
+        if getattr(self.ctl, "suspend_hotkeys", None):
+            self.ctl.suspend_hotkeys()  # senão o Windows "come" o atalho antigo antes daqui
+        self.grabKeyboard()
+
+    def stop(self):
+        if not self.capturing:
+            return
+        self.capturing = False
+        self.releaseKeyboard()
+        self.setStyleSheet("")
+        self.setText(self.value)
+        if getattr(self.ctl, "register_hotkeys", None):
+            self.ctl.register_hotkeys()
+
+    def keyPressEvent(self, e):
+        if not self.capturing:
+            return super().keyPressEvent(e)
+        if e.key() == Qt.Key_Escape:
+            self.stop()
+            return
+        text, err = hotkeys.from_event(e)
+        if err:
+            self.message.emit(tr("keys.need_mod"))
+            return
+        if text:
+            self.capturing = False
+            self.releaseKeyboard()
+            self.setStyleSheet("")
+            self.captured.emit(text)
+
+    def focusOutEvent(self, e):
+        self.stop()
+        super().focusOutEvent(e)
+
+
 class _Bridge(QObject):
     done = Signal(bool, str, object)
 
@@ -230,7 +295,7 @@ class SettingsWindow(QWidget):
         self.ctl = ctl
         self.cfg = ctl.cfg
         self.setObjectName("root")
-        self.setWindowTitle("LLyrics — configurações")
+        self.setWindowTitle(tr("set.title"))
         self.resize(860, 680)
         self.setMinimumSize(720, 520)
         self.setStyleSheet(STYLE + _arrow_css())
@@ -261,7 +326,7 @@ class SettingsWindow(QWidget):
         logo.setStyleSheet("border: none;")
         brand.addWidget(logo)
         name = QLabel(f"<span style='font-size:18px; font-weight:800;'>LLyrics</span><br>"
-                      f"<span style='color:{MUTED}; font-size:11px;'>versão {__version__}</span>")
+                      f"<span style='color:{MUTED}; font-size:11px;'>{tr('set.version', v=__version__)}</span>")
         name.setStyleSheet("border: none;")
         f = name.font()
         f.setFamily(render.family("poppins"))
@@ -273,10 +338,9 @@ class SettingsWindow(QWidget):
         self.nav.setObjectName("sidebar")
         self.nav.setFrameShape(QFrame.NoFrame)
         sv.addWidget(self.nav, 1)
-        keys = QLabel(f"<span style='color:{MUTED}; font-size:11px; line-height:150%;'>"
-                      "Ctrl+Shift+L &nbsp;mostrar/esconder<br>Ctrl+Shift+K &nbsp;mover<br>"
-                      "Ctrl+Shift+O &nbsp;configurações</span>")
-        keys.setStyleSheet("border: none;")
+        self.side_keys = QLabel()
+        keys = self.side_keys
+        self._update_side_keys()
         sv.addWidget(keys)
         body.addWidget(side)
 
@@ -292,17 +356,17 @@ class SettingsWindow(QWidget):
         footer.setObjectName("footer")
         fh = QHBoxLayout(footer)
         fh.setContentsMargins(16, 10, 16, 10)
-        move = QPushButton("Mover janelas")
+        move = QPushButton(tr("btn.move"))
         move.clicked.connect(ctl.toggle_edit)
-        reset = QPushButton("Restaurar padrão")
+        reset = QPushButton(tr("btn.reset"))
         reset.clicked.connect(self._reset)
-        done = QPushButton("Pronto")
+        done = QPushButton(tr("btn.done"))
         done.setObjectName("primary")
         done.clicked.connect(self.close)
         fh.addWidget(move)
         fh.addWidget(reset)
         fh.addStretch(1)
-        tip = QLabel("As mudanças aparecem na hora")
+        tip = QLabel(tr("footer.tip"))
         tip.setObjectName("caption")
         fh.addWidget(tip)
         fh.addSpacing(10)
@@ -350,18 +414,18 @@ class SettingsWindow(QWidget):
         layout.addWidget(card)
         return cv
 
-    def _row(self, key, label, kind, caption=None):
+    def _row(self, key, kind):
         w = QWidget()
         h = QHBoxLayout(w)
         h.setContentsMargins(0, 2, 0, 2)
         h.setSpacing(16)
         lv = QVBoxLayout()
         lv.setSpacing(1)
-        lb = QLabel(label)
+        lb = QLabel(tr(f"opt.{key}"))
         lb.setObjectName("rowLabel")
         lv.addWidget(lb)
-        if caption:
-            c = QLabel(caption)
+        if f"cap.{key}" in i18n.S:
+            c = QLabel(tr(f"cap.{key}", key=self.cfg.get("hotkey_move", "")))
             c.setObjectName("caption")
             c.setWordWrap(True)
             lv.addWidget(c)
@@ -372,77 +436,65 @@ class SettingsWindow(QWidget):
         return w
 
     def _build_pages(self):
-        screens = [(i, f"Monitor {i + 1} ({s.size().width()}x{s.size().height()})")
+        screens = [(i, tr("monitor.name", n=i + 1, w=s.size().width(), h=s.size().height()))
                    for i, s in enumerate(QGuiApplication.screens())]
+        C = i18n.choices
 
-        v = self._page("◎", "Geral", "O que aparece na tela, onde e quando.")
-        self._card(v, "Exibição", [
-            ("show_lyrics", "Mostrar letras", "bool"),
-            ("show_widget", "Mostrar widget do player", "bool", "Capa, título, artista e barra de progresso."),
-            ("hide_paused", "Ocultar quando pausado", "bool"),
+        v = self._page("◎", tr("page.general"), tr("page.general.sub"))
+        self._card(v, tr("card.language"), [("language", ("choice", i18n.LANGUAGES))])
+        self._card(v, tr("card.display"), [("show_lyrics", "bool"), ("show_widget", "bool"),
+                                           ("hide_paused", "bool")])
+        self._card(v, tr("card.position"), [
+            ("position_mode", ("choice", C(POSITION_MODES))),
+            ("allow_center", "bool"),
+            ("center_zone", ("slider", 0.15, 0.7, 0.01, "")),
+            ("screen_index", ("choice", screens)),
         ])
-        self._card(v, "Posição", [
-            ("position_mode", "Posição da letra", ("choice", POSITION_MODES),
-             "Aleatória: cada linha nova aparece num lugar diferente."),
-            ("allow_center", "Pode aparecer no centro da tela", "bool",
-             "Desligue em jogos de tiro para a letra nunca cobrir a mira."),
-            ("center_zone", "Tamanho da área livre no centro", ("slider", 0.15, 0.7, 0.01, "")),
-            ("screen_index", "Monitor", ("choice", screens)),
+        self._card(v, tr("card.sync"), [
+            ("sync_offset", ("slider", -3.0, 3.0, 0.05, "s")),
+            ("fps", ("choice", [(30, "30"), (60, "60"), (120, "120"), (144, "144")])),
         ])
-        self._card(v, "Sincronia e desempenho", [
-            ("sync_offset", "Ajuste de sincronia", ("slider", -3.0, 3.0, 0.05, "s"),
-             "Aumente se as palavras chegam depois de você ouvir."),
-            ("fps", "Quadros por segundo", ("choice", [(30, "30"), (60, "60"), (120, "120"), (144, "144")])),
+        self._card(v, tr("card.app"), [("autostart", "bool"), ("auto_update", "bool")])
+        v.addStretch(1)
+
+        v = self._page("✦", tr("page.animation"), tr("page.animation.sub"))
+        self._card(v, tr("card.layout"), [
+            ("layout", ("choice", C(LAYOUTS))),
+            ("animation", ("choice", C(ANIMATIONS))),
+            ("exit_animation", ("choice", C(EXITS))),
+            ("typewriter_sync", "bool"),
+            ("typewriter_speed", ("slider", 0.3, 3.0, 0.1, "x")),
         ])
-        self._card(v, "App", [
-            ("autostart", "Abrir junto com o Windows", "bool"),
-            ("auto_update", "Procurar atualizações sozinho", "bool"),
+        self._card(v, tr("card.extras"), [("karaoke", "bool"), ("countdown", "bool"), ("previous_line", "bool"),
+                                          ("preview", "bool")])
+        self._card(v, tr("card.effects"), [
+            ("idle", ("choice", C(IDLES))),
+            ("idle_speed", ("slider", 0.1, 3.0, 0.05, "x")),
+            ("idle_strength", ("slider", 0.1, 3.0, 0.05, "x")),
+            ("sparkle", "bool"),
+            ("sparkle_amount", ("slider", 0.5, 4.0, 0.25, "x")),
+            ("party", "bool"),
+            ("party_effects", ("choice", C(PARTY_EFFECTS))),
         ])
         v.addStretch(1)
 
-        v = self._page("✦", "Animação", "Como as linhas entram, ficam e saem.")
-        self._card(v, "Layout e movimento", [
-            ("layout", "Layout", ("choice", LAYOUTS),
-             "Pilha: palavras importantes grandes e as pequenas menores, uma de cada vez."),
-            ("animation", "Entrada", ("choice", ANIMATIONS)),
-            ("exit_animation", "Saída", ("choice", EXITS)),
-            ("typewriter_sync", "Digitar no ritmo da música", "bool"),
-            ("typewriter_speed", "Velocidade da digitação", ("slider", 0.3, 3.0, 0.1, "x")),
-        ])
-        self._card(v, "Extras da letra", [
-            ("karaoke", "Destaque de karaokê", "bool", "A linha acende conforme é cantada."),
-            ("countdown", "Contagem instrumental", "bool", "Pontinhos enchendo nas pausas longas."),
-            ("previous_line", "Linha anterior", "bool"),
-            ("preview", "Prévia da próxima linha", "bool"),
-        ])
-        self._card(v, "Efeitos", [
-            ("idle", "Movimento parado", ("choice", IDLES)),
-            ("idle_speed", "Velocidade do movimento", ("slider", 0.1, 3.0, 0.05, "x")),
-            ("idle_strength", "Força do movimento", ("slider", 0.1, 3.0, 0.05, "x")),
-            ("sparkle", "Brilhinhos na letra", "bool"),
-            ("sparkle_amount", "Quantidade de brilhinhos", ("slider", 0.5, 4.0, 0.25, "x")),
-            ("party", "Modo festa", "bool", "Notas musicais subindo ao fundo."),
-            ("party_effects", "Efeitos da festa", ("choice", PARTY_EFFECTS)),
-        ])
-        v.addStretch(1)
-
-        v = self._page("◐", "Estilo", "Cores, fonte e acabamento da letra.")
-        cv = self._card(v, "Estilos prontos")
+        v = self._page("◐", tr("page.style"), tr("page.style.sub"))
+        cv = self._card(v, tr("card.presets"))
         grid = QGridLayout()
         grid.setSpacing(8)
-        for i, name in enumerate(PRESETS):
-            b = QPushButton(name)
+        for i, (name, _settings) in enumerate(PRESETS):
+            b = QPushButton(tr(name) if name in i18n.S else name)
             b.setObjectName("chip")
             b.setCursor(Qt.PointingHandCursor)
-            b.clicked.connect(lambda _=False, n=name: self._apply_preset(n))
+            b.clicked.connect(lambda _=False, n=i: self._apply_preset(n))
             grid.addWidget(b, i // 4, i % 4)
         cv.addLayout(grid)
 
-        cv = self._card(v, "Looks da comunidade")
+        cv = self._card(v, tr("card.community"))
         imp = QHBoxLayout()
         self.code_edit = QLineEdit()
-        self.code_edit.setPlaceholderText("Cole o código ou o link de um look (ex.: STL-JMQZYC)")
-        self.code_btn = QPushButton("Importar")
+        self.code_edit.setPlaceholderText(tr("import.placeholder"))
+        self.code_btn = QPushButton(tr("btn.import"))
         self.code_btn.setObjectName("primary")
         self.code_btn.setCursor(Qt.PointingHandCursor)
         self.code_btn.clicked.connect(self._import_code)
@@ -455,79 +507,88 @@ class SettingsWindow(QWidget):
         self.import_msg.setWordWrap(True)
         self.import_msg.setVisible(False)
         cv.addWidget(self.import_msg)
-        credit = QLabel(
-            f"<span style='color:{MUTED}; font-size:11px;'>Encontre looks em "
-            f"<a href='{MOD_SITE}' style='color:{ACC}; text-decoration:none;'>lyrics.remake.lol</a>"
-            f", a galeria do mod <b>Show the Lyrics</b>, criado por <b>{MOD_AUTHOR}</b>.</span>")
+        site = f"<a href='{MOD_SITE}' style='color:{ACC}; text-decoration:none;'>lyrics.remake.lol</a>"
+        credit = QLabel(f"<span style='color:{MUTED}; font-size:11px;'>"
+                        f"{tr('community.credit', site=site, author=MOD_AUTHOR)}</span>")
         credit.setOpenExternalLinks(True)
         credit.setWordWrap(True)
         cv.addWidget(credit)
 
-        self._card(v, "Cor", [
-            ("accent", "Cor de destaque", ("choice", ACCENT_CHOICES), "Álbum usa a cor da capa da música."),
-            ("custom_colour", "Cor personalizada", "color"),
-            ("colour_mode", "Modo de cor", ("choice", COLOUR_MODES)),
-            ("second_colour", "Segunda cor", "color"),
-            ("third_colour", "Terceira cor", "color"),
+        self._card(v, tr("card.colour"), [
+            ("accent", ("choice", C(ACCENT_CHOICES))),
+            ("custom_colour", "color"),
+            ("colour_mode", ("choice", C(COLOUR_MODES))),
+            ("second_colour", "color"),
+            ("third_colour", "color"),
         ])
-        self._card(v, "Fonte", [
-            ("font", "Fonte", ("choice", [(k, n) for k, n, _ in FONTS])),
-            ("bold", "Negrito", "bool"),
-            ("uppercase", "Maiúsculas", "bool"),
-            ("text_size", "Tamanho do texto", ("slider", 16, 120, 1, "px")),
-            ("letter_spacing", "Espaço entre letras", ("slider", -3.0, 12.0, 0.5, "px")),
-            ("line_spacing", "Espaço entre linhas", ("slider", 0, 40, 1, "px")),
-            ("line_width", "Largura da linha", ("slider", 300, 1800, 10, "px")),
+        self._card(v, tr("card.font"), [
+            ("font", ("choice", C([(k, n) for k, n, _ in FONTS]))),
+            ("bold", "bool"),
+            ("uppercase", "bool"),
+            ("text_size", ("slider", 16, 120, 1, "px")),
+            ("letter_spacing", ("slider", -3.0, 12.0, 0.5, "px")),
+            ("line_spacing", ("slider", 0, 40, 1, "px")),
+            ("line_width", ("slider", 300, 1800, 10, "px")),
         ])
-        self._card(v, "Acabamento", [
-            ("outline", "Contorno", "bool"),
-            ("outline_colour", "Cor do contorno", "color"),
-            ("outline_thickness", "Espessura do contorno", ("slider", 0.3, 2.5, 0.05, "x")),
-            ("drop_shadow", "Sombra", "bool"),
-            ("glow", "Brilho", "bool"),
-            ("background", "Fundo atrás do texto", "bool"),
-            ("lyrics_opacity", "Opacidade da letra", ("slider", 0.15, 1.0, 0.05, "")),
-        ])
-        v.addStretch(1)
-
-        v = self._page("▣", "Widget", "O cartão \"tocando agora\".")
-        self._card(v, "Widget do player", [
-            ("widget_position", "Posição", ("choice", WIDGET_POSITIONS),
-             "Use Ctrl+Shift+K para arrastar para onde quiser."),
-            ("widget_scale", "Tamanho", ("slider", 0.6, 2.0, 0.05, "x")),
-            ("widget_opacity", "Opacidade", ("slider", 0.2, 1.0, 0.05, "")),
+        self._card(v, tr("card.finish"), [
+            ("outline", "bool"),
+            ("outline_colour", "color"),
+            ("outline_thickness", ("slider", 0.3, 2.5, 0.05, "x")),
+            ("drop_shadow", "bool"),
+            ("glow", "bool"),
+            ("background", "bool"),
+            ("lyrics_opacity", ("slider", 0.15, 1.0, 0.05, "")),
         ])
         v.addStretch(1)
 
-        v = self._page("♡", "Sobre", "Versão, atualizações e créditos.")
+        v = self._page("▣", tr("page.widget"), tr("page.widget.sub"))
+        self._card(v, tr("card.widget"), [
+            ("widget_position", ("choice", C(WIDGET_POSITIONS))),
+            ("widget_scale", ("slider", 0.6, 2.0, 0.05, "x")),
+            ("widget_opacity", ("slider", 0.2, 1.0, 0.05, "")),
+        ])
+        v.addStretch(1)
+
+        v = self._page("⌨", tr("page.keys"), tr("page.keys.sub"))
+        cv = self._card(v, tr("card.shortcuts"), [(k, "hotkey") for k in HOTKEY_DEFAULTS])
+        self.keys_msg = QLabel(tr("keys.caption"))
+        self.keys_msg.setObjectName("caption")
+        self.keys_msg.setWordWrap(True)
+        cv.addWidget(self.keys_msg)
+        rk = QHBoxLayout()
+        rk.addStretch(1)
+        rbtn = QPushButton(tr("keys.reset"))
+        rbtn.setCursor(Qt.PointingHandCursor)
+        rbtn.clicked.connect(self._reset_hotkeys)
+        rk.addWidget(rbtn)
+        cv.addLayout(rk)
+        v.addStretch(1)
+
+        v = self._page("♡", tr("page.about"), tr("page.about.sub"))
         cv = self._card(v, "LLyrics")
         info = QHBoxLayout()
         logo = QLabel()
         logo.setPixmap(_icon_pixmap(56))
         info.addWidget(logo)
         txt = QLabel(f"<span style='font-size:16px; font-weight:700;'>LLyrics {__version__}</span><br>"
-                     f"<span style='color:{MUTED};'>Letras sincronizadas por cima dos seus jogos.</span><br>"
+                     f"<span style='color:{MUTED};'>{tr('app.tagline')}</span><br>"
                      f"<a href='https://github.com/{UPDATE_REPO}' style='color:{ACC}; text-decoration:none;'>"
                      f"github.com/{UPDATE_REPO}</a>")
         txt.setOpenExternalLinks(True)
         info.addWidget(txt, 1)
-        upd = QPushButton("Procurar atualizações")
+        upd = QPushButton(tr("btn.check_updates"))
         upd.setObjectName("primary")
         upd.setCursor(Qt.PointingHandCursor)
         upd.clicked.connect(lambda: getattr(self.ctl, "updater", None) and self.ctl.updater.check(manual=True))
         info.addWidget(upd)
         cv.addLayout(info)
 
-        cv = self._card(v, "Créditos")
+        cv = self._card(v, tr("card.credits"))
+        site = f"<a href='{MOD_SITE}' style='color:{ACC}; text-decoration:none;'>lyrics.remake.lol</a>"
         credits = QLabel(
-            f"<p style='line-height:150%;'>Inspirado no mod de Minecraft <b>Show the Lyrics</b>, "
-            f"criado por <b>{MOD_AUTHOR}</b>. Os estilos \"Shake\" e \"Void Echoes\" vêm da galeria da "
-            f"comunidade do mod: <a href='{MOD_SITE}' style='color:{ACC}; text-decoration:none;'>"
-            f"lyrics.remake.lol</a> (looks de Sodd71 e Trickbound).<br>"
-            f"O código do LLyrics foi escrito do zero; nenhum código do mod foi usado.</p>"
-            f"<p style='line-height:150%;'>Letras: <a href='https://lrclib.net' style='color:{ACC}; "
-            f"text-decoration:none;'>lrclib.net</a><br>"
-            f"Fontes: Google Fonts, licença SIL Open Font License</p>")
+            f"<p style='line-height:150%;'>{tr('credits.main', author=MOD_AUTHOR, site=site)}</p>"
+            f"<p style='line-height:150%;'>{tr('credits.lyrics')} <a href='https://lrclib.net' "
+            f"style='color:{ACC}; text-decoration:none;'>lrclib.net</a><br>{tr('credits.fonts')}</p>")
         credits.setOpenExternalLinks(True)
         credits.setWordWrap(True)
         cv.addWidget(credits)
@@ -541,6 +602,13 @@ class SettingsWindow(QWidget):
             w.setChecked(bool(cfg[key]))
             w.toggled.connect(lambda v, k=key: self._set(k, bool(v)))
             self.fields[key] = ("bool", w)
+            return w
+        if kind == "hotkey":
+            w = HotkeyButton(self.ctl)
+            w.set_value(cfg[key])
+            w.captured.connect(lambda text, k=key: self._hotkey_captured(k, text))
+            w.message.connect(lambda m: self.keys_msg.setText(m))
+            self.fields[key] = ("hotkey", w)
             return w
         if kind == "color":
             w = ColorButton()
@@ -591,6 +659,13 @@ class SettingsWindow(QWidget):
         self.fields[key] = ("slider", s, lo, step, show)
         return box
 
+    def _update_side_keys(self):
+        c = self.cfg
+        self.side_keys.setText(
+            f"<span style='color:{MUTED}; font-size:11px;'>"
+            f"{c['hotkey_toggle']} &nbsp;{tr('side.toggle')}<br>{c['hotkey_move']} &nbsp;{tr('side.move')}<br>"
+            f"{c['hotkey_settings']} &nbsp;{tr('side.settings')}</span>")
+
     # Linhas que só fazem sentido com outra opção ligada
     def _update_visibility(self):
         c = self.cfg
@@ -615,8 +690,42 @@ class SettingsWindow(QWidget):
                 self.rows[key].setVisible(bool(show))
 
     # ------------------------------------------------------------ ações
+    def _hotkey_captured(self, key, text):
+        btn = self.fields[key][1]
+        others = [k for k in HOTKEY_DEFAULTS if k != key]
+        if any(self.cfg[k].lower() == text.lower() for k in others):
+            self.keys_msg.setText(tr("keys.duplicate"))
+        else:
+            old = self.cfg[key]
+            self.cfg[key] = text
+            failed = self.ctl.register_hotkeys() if getattr(self.ctl, "register_hotkeys", None) else []
+            if key in failed:
+                self.cfg[key] = old
+                self.keys_msg.setText(tr("keys.in_use", keys=text))
+            else:
+                self.keys_msg.setText(tr("keys.saved"))
+                self.cfg.save()
+        if getattr(self.ctl, "register_hotkeys", None):
+            self.ctl.register_hotkeys()
+        btn.set_value(self.cfg[key])
+        self._update_side_keys()
+
+    def _reset_hotkeys(self):
+        self.cfg.update(HOTKEY_DEFAULTS)
+        failed = self.ctl.register_hotkeys() if getattr(self.ctl, "register_hotkeys", None) else []
+        self.keys_msg.setText(tr("keys.in_use", keys=", ".join(self.cfg[k] for k in failed)) if failed
+                              else tr("keys.saved"))
+        self.cfg.save()
+        self.refresh()
+        self._update_side_keys()
+
     def _set(self, key, value):
         self.cfg[key] = value
+        if key == "language":
+            self.cfg.save()
+            if getattr(self.ctl, "language_changed", None):
+                self.ctl.language_changed()
+            return
         if key == "autostart":
             import winutil
             winutil.set_autostart(bool(value))
@@ -625,7 +734,7 @@ class SettingsWindow(QWidget):
         self._save_timer.start()
 
     def _pick_color(self, key):
-        c = QColorDialog.getColor(QColor(self.cfg[key]), self, "Escolha a cor")
+        c = QColorDialog.getColor(QColor(self.cfg[key]), self, tr("color.pick"))
         if c.isValid():
             self.fields[key][1].set_color(c.name())
             if key == "custom_colour":
@@ -633,9 +742,9 @@ class SettingsWindow(QWidget):
                 self.refresh()
             self._set(key, c.name())
 
-    def _apply_preset(self, name):
+    def _apply_preset(self, index):
         self.cfg.update(_RESET_EXTRAS)
-        self.cfg.update(PRESETS[name])
+        self.cfg.update(PRESETS[index][1])
         self.refresh()
         self.ctl.apply_config()
         self.cfg.save()
@@ -643,12 +752,12 @@ class SettingsWindow(QWidget):
     def _import_code(self):
         code = self.code_edit.text()
         self.code_btn.setEnabled(False)
-        self._msg("Buscando o look…")
+        self._msg(tr("import.searching"))
 
         def work():
             try:
                 name, author, settings = looks.fetch_look(code)
-                self._bridge.done.emit(True, f"\"{name}\"" + (f" de {author}" if author else ""), settings)
+                self._bridge.done.emit(True, f"\"{name}\"" + (tr("import.by", author=author) if author else ""), settings)
             except ValueError as e:
                 self._bridge.done.emit(False, str(e), {})
 
@@ -668,10 +777,11 @@ class SettingsWindow(QWidget):
         self.refresh()
         self.ctl.apply_config()
         self.cfg.save()
-        self._msg(f"✓ Look {msg} aplicado. Coisas só do Minecraft (3D, PvP) ficam de fora.")
+        self._msg(tr("import.applied", name=msg))
 
     def _reset(self):
-        keep = {k: self.cfg[k] for k in ("lyrics_x", "lyrics_y", "screen_index", "autostart", "auto_update")}
+        keep = {k: self.cfg[k] for k in ("lyrics_x", "lyrics_y", "screen_index", "autostart", "auto_update",
+                                         "language", *HOTKEY_DEFAULTS)}
         self.cfg.reset()
         self.cfg.update(keep)
         self.refresh()
@@ -686,6 +796,8 @@ class SettingsWindow(QWidget):
                 w.setChecked(bool(self.cfg[key]))
             elif kind == "color":
                 w.set_color(self.cfg[key])
+            elif kind == "hotkey":
+                w.set_value(self.cfg[key])
             elif kind == "choice":
                 i = w.findData(self.cfg[key])
                 if i >= 0:
@@ -702,6 +814,9 @@ class SettingsWindow(QWidget):
         self.ctl.demo = True
 
     def closeEvent(self, e):
+        for f in self.fields.values():
+            if f[0] == "hotkey":
+                f[1].stop()
         self.ctl.demo = False
         if self.ctl.edit:
             self.ctl.set_edit(False)

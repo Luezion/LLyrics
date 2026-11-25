@@ -1,0 +1,58 @@
+LLYRICS - overlay de letras sincronizadas para jugar
+====================================================
+
+Muestra la letra de la canción que suena encima de tu juego, al estilo del mod
+de Minecraft "Show the Lyrics": máquina de escribir, karaoke, colores de la
+portada del álbum, cuenta regresiva instrumental y un widget "reproduciendo ahora".
+Funciona con cualquier reproductor que aparezca en los controles multimedia de
+Windows (Spotify, YouTube/YouTube Music en el navegador, Apple Music, Deezer, VLC...).
+Las letras vienen de lrclib.net, el mismo sitio que usa el mod.
+
+CÓMO ABRIRLO
+1. Extrae el zip completo en una carpeta tuya (ej.: Documentos\LLyrics).
+   No abras el .exe desde dentro del zip y deja la carpeta _internal junto a él.
+   Evita "Archivos de programa": ahí la app no puede actualizarse sola.
+2. Haz doble clic en LLyrics.exe. No hace falta instalar Python ni nada más.
+   Si aparece "Windows protegió tu PC", haz clic en
+   "Más información" > "Ejecutar de todas formas" (la app no tiene firma de pago).
+3. Pon una canción. La app queda en la bandeja, junto al reloj (ícono ♪).
+
+IDIOMA
+Ajustes > General > Idioma: English, Español o Português (Brasil).
+
+ATAJOS (puedes cambiarlos en Ajustes > Atajos)
+  Ctrl+Shift+L  mostrar/ocultar el overlay
+  Ctrl+Shift+K  modo mover: arrastra la letra y el widget; vuelve a pulsar para terminar
+  Ctrl+Shift+O  ajustes (o haz clic en el ícono ♪ de la bandeja)
+
+INICIAR CON WINDOWS
+Ajustes > General > "Iniciar con Windows".
+
+ACTUALIZACIONES
+Cuando sale una versión nueva, la app muestra una ventana para actualizar con un clic.
+También puedes buscarla desde el menú del ícono ♪ > "Buscar actualizaciones".
+
+EN VALORANT Y OTROS JUEGOS
+- Usa "Pantalla completa en ventana" (sin bordes). En pantalla completa exclusiva
+  ningún overlay puede aparecer encima.
+- El overlay deja pasar los clics del ratón directo al juego.
+- Desactiva "Puede aparecer en el centro de la pantalla" para que la letra nunca
+  tape la mira.
+- No toca el juego: son solo ventanas transparentes de Windows, como el overlay de
+  Discord. Aun así, no hay aprobación oficial de los desarrolladores de juegos para
+  apps de terceros; úsala bajo tu responsabilidad.
+
+LOOKS DE LA COMUNIDAD (lyrics.remake.lol)
+En Ajustes > Estilo, pega el código de un look (ej.: STL-JMQZYC) o su enlace y
+haz clic en Importar. "Shake" y "Void Echoes" ya vienen en "Estilos listos".
+Créditos: el mod "Show the Lyrics" es de FireStund; lyrics.remake.lol es su galería de la comunidad.
+
+PROBLEMAS COMUNES
+- Letra adelantada/atrasada: General > Ajuste de sincronía.
+- "No hay letra sincronizada": lrclib no tiene esa canción con tiempos marcados.
+- Desaparece en pausa: desactiva "Ocultar en pausa".
+- Algunos sitios en el navegador no informan el tiempo de la canción, así que no
+  se puede sincronizar. Spotify y YouTube funcionan.
+
+Los ajustes se guardan en %APPDATA%\LLyrics\config.json.
+Las fuentes vienen de Google Fonts (licencia SIL Open Font License).

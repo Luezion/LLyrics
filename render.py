@@ -6,6 +6,7 @@ from PySide6.QtGui import (QBrush, QColor, QFont, QFontDatabase, QFontMetricsF, 
                            QLinearGradient, QPainter, QPainterPath, QPen, QPixmap, QTransform)
 
 from config import ACCENTS, FONTS, RAINBOW, resource_path
+from i18n import tr
 
 ENTER = 0.38     # segundos de animação de entrada
 EXIT = 0.32      # saída
@@ -962,11 +963,11 @@ def draw_widget(p, cfg, info, album_color):
     sf = QFont(family("poppins"))
     sf.setPixelSize(int(10 * s))
     p.setFont(tf)
-    title = QFontMetricsF(tf).elidedText(info.title or "Nada tocando", Qt.ElideRight, tw)
+    title = QFontMetricsF(tf).elidedText(info.title or tr("widget.nothing"), Qt.ElideRight, tw)
     p.setPen(QColor(255, 255, 255, int(245 * op)))
     p.drawText(QPointF(tx, pad + 15 * s), title)
     p.setFont(af)
-    artist = QFontMetricsF(af).elidedText(info.artist or "Abra o Spotify, YouTube ou outro player",
+    artist = QFontMetricsF(af).elidedText(info.artist or tr("widget.open_player"),
                                           Qt.ElideRight, tw)
     p.setPen(QColor(255, 255, 255, int(150 * op)))
     p.drawText(QPointF(tx, pad + 33 * s), artist)
@@ -996,7 +997,7 @@ def draw_widget(p, cfg, info, album_color):
         p.drawText(QPointF(tx + tw - QFontMetricsF(sf).horizontalAdvance(dur), H - pad), dur)
     if not info.playing and info.title:
         p.setPen(QColor(255, 255, 255, int(120 * op)))
-        pz = "❚❚ pausado"
+        pz = tr("widget.paused")
         p.drawText(QPointF(tx + tw / 2 - QFontMetricsF(sf).horizontalAdvance(pz) / 2, H - pad), pz)
     return W, H
 

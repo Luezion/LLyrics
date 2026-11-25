@@ -1,0 +1,57 @@
+LLYRICS - overlay de letras sincronizadas para jogar
+====================================================
+
+Mostra a letra da música que está tocando por cima do jogo, no estilo do mod
+"Show the lyrics": máquina de escrever, karaokê, cor tirada da capa do álbum,
+contagem nos trechos instrumentais e widget "tocando agora".
+Funciona com qualquer player que aparece no controle de mídia do Windows
+(Spotify, YouTube/YouTube Music no navegador, Apple Music, Deezer, VLC...).
+As letras vêm do lrclib.net, o mesmo site que o mod usa.
+
+COMO ABRIR
+1. Extraia o zip inteiro numa pasta sua (ex.: Documentos\LLyrics).
+   Não abra o .exe de dentro do zip, e mantenha a pasta _internal junto dele.
+   Evite "Arquivos de Programas": lá o app não consegue se atualizar sozinho.
+2. Dê dois cliques em LLyrics.exe. Não precisa instalar Python nem nada.
+   Se aparecer "O Windows protegeu o computador", clique em
+   "Mais informações" > "Executar assim mesmo" (o app não tem assinatura paga).
+3. Toque uma música. O app fica na bandeja, perto do relógio (ícone ♪).
+
+IDIOMA
+Configurações > Geral > Idioma: English, Español ou Português (Brasil).
+
+ATALHOS (dá para trocar em Configurações > Atalhos)
+  Ctrl+Shift+L  mostra/esconde o overlay
+  Ctrl+Shift+K  modo mover: arraste a letra e o widget; aperte de novo para terminar
+  Ctrl+Shift+O  configurações (ou clique no ícone ♪ da bandeja)
+
+ABRIR JUNTO COM O WINDOWS
+Configurações > Geral > "Abrir junto com o Windows".
+
+ATUALIZAÇÕES
+Quando sair uma versão nova, o app mostra uma tela para atualizar com um clique.
+Também dá para procurar pelo menu do ícone ♪ > "Procurar atualizações".
+
+NO VALORANT E OUTROS JOGOS
+- Use "Janela em tela cheia" (sem bordas). No modo "Tela cheia" exclusivo nenhum
+  overlay consegue aparecer por cima.
+- O overlay deixa o mouse passar direto para o jogo.
+- Desligue "Pode aparecer no centro da tela" para a letra nunca cobrir a mira.
+- Ele não mexe no jogo: são só janelas transparentes do Windows, como o
+  overlay do Discord. Ainda assim, não existe aprovação oficial das
+  desenvolvedoras para apps de terceiros; use por sua conta.
+
+LOOKS DA COMUNIDADE (lyrics.remake.lol)
+Em Configurações > Estilo, cole o código de um look (ex.: STL-JMQZYC) ou o link
+dele e clique em Importar. "Shake" e "Void Echoes" já vêm em "Estilos prontos".
+Créditos: o mod "Show the Lyrics" é de FireStund; lyrics.remake.lol é a galeria da comunidade dele.
+
+PROBLEMAS COMUNS
+- Letra adiantada/atrasada: Geral > Ajuste de sincronia.
+- "Sem letra sincronizada": o lrclib não tem essa música com tempo marcado.
+- Some quando pausa: desligue "Ocultar quando pausado".
+- Alguns sites no navegador não informam o tempo da música; aí não dá para
+  sincronizar. Spotify e YouTube funcionam.
+
+As configurações ficam em %APPDATA%\LLyrics\config.json.
+As fontes vêm do Google Fonts (licença SIL Open Font License).

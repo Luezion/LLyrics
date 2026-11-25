@@ -10,16 +10,16 @@ from PySide6.QtWidgets import QWidget
 import lyrics as lyr
 import render
 import winutil
+from i18n import tr
 
-DEMO_LRC = """[00:00.50]Bem-vindo ao seu overlay de letras
-[00:04.20]Cada linha chega no tempo da música
-[00:08.00]Arraste, mude a cor, troque a fonte
-[00:11.60]E deixe do jeito que você curtir
-[00:15.20]
-[00:21.00]Depois da pausa a letra volta sozinha
-[00:25.00]Bom jogo e boa música!
-[00:29.00]
-"""
+DEMO_TIMES = ["00:00.50", "00:04.20", "00:08.00", "00:11.60", "00:15.20", "00:21.00", "00:25.00", "00:29.00"]
+
+
+def demo_lrc():
+    """Letra de exemplo no idioma atual (linhas vazias marcam a pausa instrumental)."""
+    texts = [tr("demo.1"), tr("demo.2"), tr("demo.3"), tr("demo.4"), "", tr("demo.5"), tr("demo.6"), ""]
+    return "\n".join(f"[{t}]{x}" for t, x in zip(DEMO_TIMES, texts))
+
 DEMO_LEN = 31.0
 
 
@@ -84,7 +84,7 @@ class LyricsWindow(_Base):
         p.setCompositionMode(QPainter.CompositionMode_Source)
         p.fillRect(self.rect(), Qt.transparent)
         p.setCompositionMode(QPainter.CompositionMode_SourceOver)
-        self.paint_edit_frame(p, "Letra — arraste para mover  ·  Ctrl+Shift+K para terminar")
+        self.paint_edit_frame(p, tr("edit.lyrics_label", key=self.ctl.cfg.get("hotkey_move", "")))
         c = self.ctl
         lines, wins, t = c.current_lyrics()
         if lines:
@@ -130,7 +130,7 @@ class Controller(QObject):
         self.demo = False
         self.edit = False
         self.hidden_by_user = False
-        self._demo_lines = lyr.parse_lrc(DEMO_LRC)
+        self._demo_lines = lyr.parse_lrc(demo_lrc())
         self._demo_wins = render.line_windows(self._demo_lines, cfg)
         self._demo_start = time.monotonic()
         self._retry_at = None
@@ -181,9 +181,9 @@ class Controller(QObject):
             info.duration = self.duration
             info.playing = self.playing
             info.cover = self.cover
-            info.status = self.status
+            info.status = tr(self.status) if self.status else ""
         elif self.demo or self.edit:
-            info.title, info.artist = "Prévia do overlay", "Toque uma música para ver a letra"
+            info.title, info.artist = tr("widget.preview_title"), tr("widget.preview_artist")
             info.position = (time.monotonic() - self._demo_start) % DEMO_LEN
             info.duration = DEMO_LEN
             info.playing = True
@@ -222,7 +222,7 @@ class Controller(QObject):
             self._fetch(snap)
 
     def _fetch(self, snap):
-        self.status = "Buscando letra…"
+        self.status = "status.searching"
         tid, title, artist, album, dur = snap.track_id, snap.title, snap.artist, snap.album, snap.duration
 
         def work():
@@ -231,11 +231,11 @@ class Controller(QObject):
                 if lines:
                     msg = ""
                 elif instrumental:
-                    msg = "Música instrumental"
+                    msg = "status.instrumental"
                 else:
-                    msg = "Sem letra sincronizada para esta música"
+                    msg = "status.missing"
             except lyr.LrclibBusy:
-                lines, msg = None, "lrclib está ocupado, tentando de novo…"
+                lines, msg = None, "status.busy"
             self.lyrics_signal.emit(tid, lines, msg)
 
         threading.Thread(target=work, daemon=True).start()
@@ -251,7 +251,7 @@ class Controller(QObject):
             self.windows = render.line_windows(lines, self.cfg)
         self.status = msg
         if self.lines and self.duration <= 0:
-            self.status = "Este player não informa o tempo da música"
+            self.status = "status.no_time"
 
     # ------------------------------------------------------------ janelas
     def screen(self):
@@ -263,6 +263,7 @@ class Controller(QObject):
         cfg = self.cfg
         if self.lines:
             self.windows = render.line_windows(self.lines, cfg)
+        self._demo_lines = lyr.parse_lrc(demo_lrc())
         self._demo_wins = render.line_windows(self._demo_lines, cfg)
         geo = self.screen().geometry()
         size = float(cfg["text_size"])

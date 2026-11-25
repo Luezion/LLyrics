@@ -1,6 +1,25 @@
-# Novidades do LLyrics
+# LLyrics changelog
 
-<!-- A versão mais nova fica em cima. O texto da primeira seção aparece na tela de atualização do app. -->
+<!-- Newest version on top. The first section is shown in the app's update window.
+     Write it in three parts: "### English", "### Español" and "### Português";
+     the app shows the one that matches the user's language. -->
+
+## 1.2.0
+
+### English
+- The app is now in English, Spanish and Portuguese (Settings > General > Language). English is the default.
+- New "Shortcuts" page: click a shortcut and press the new keys to change it
+- The update window shows the notes in your language
+
+### Español
+- La app ahora está en inglés, español y portugués (Ajustes > General > Idioma). El inglés viene por defecto.
+- Nueva página "Atajos": haz clic en un atajo y pulsa las nuevas teclas para cambiarlo
+- La ventana de actualización muestra las novedades en tu idioma
+
+### Português
+- O app agora está em inglês, espanhol e português (Configurações > Geral > Idioma). O inglês é o padrão.
+- Nova página "Atalhos": clique num atalho e aperte as teclas novas para trocar
+- A tela de atualização mostra as novidades no seu idioma
 
 ## 1.1.0
 

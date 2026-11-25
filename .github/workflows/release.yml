@@ -56,14 +56,14 @@ jobs:
         if: steps.exists.outputs.skip != 'true'
         shell: pwsh
         run: |
-          Copy-Item LEIA-ME-exe.txt dist/LLyrics/LEIA-ME.txt
+          Copy-Item docs/exe/*.txt dist/LLyrics/
           Compress-Archive -Path dist/LLyrics/* -DestinationPath LLyrics-windows.zip
 
       - name: Notas da versão
         if: steps.exists.outputs.skip != 'true'
         shell: pwsh
         run: |
-          $lines = Get-Content NOVIDADES.md -Encoding UTF8
+          $lines = Get-Content CHANGELOG.md -Encoding UTF8
           $out = @(); $inside = $false
           foreach ($l in $lines) {
             if ($l -match '^## ') { if ($inside) { break } else { $inside = $true; continue } }
