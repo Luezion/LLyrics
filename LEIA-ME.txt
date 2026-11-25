@@ -8,7 +8,10 @@ Funciona com qualquer player que aparece no controle de mídia do Windows
 (Spotify, YouTube/YouTube Music no navegador, Apple Music, Deezer, VLC...).
 As letras vêm do lrclib.net, o mesmo site que o mod usa.
 
-COMO ABRIR
+Este é o LEIA-ME da versão pelo código. Quem baixou o LLyrics.exe pronto
+não precisa de Python: é só extrair o zip e abrir o LLyrics.exe.
+
+COMO ABRIR (PELO CÓDIGO)
 1. Instale o Python 3.10 ou mais novo: https://www.python.org/downloads/
    -> Na instalação, MARQUE "Add python.exe to PATH".
 2. Dê dois cliques em Iniciar.bat.
@@ -21,7 +24,7 @@ O app fica em dist\LLyrics\LLyrics.exe (dá para copiar essa pasta
 para onde quiser, e aí não precisa mais do Python).
 
 ABRIR JUNTO COM O WINDOWS
-Dois cliques em Abrir_com_o_Windows.bat.
+Configurações (Ctrl+Shift+O) > Geral > "Abrir junto com o Windows".
 
 ATALHOS
   Ctrl+Shift+L  mostra/esconde o overlay

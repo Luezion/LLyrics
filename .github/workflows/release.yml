@@ -56,7 +56,7 @@ jobs:
         if: steps.exists.outputs.skip != 'true'
         shell: pwsh
         run: |
-          Copy-Item LEIA-ME.txt dist/LLyrics/
+          Copy-Item LEIA-ME-exe.txt dist/LLyrics/LEIA-ME.txt
           Compress-Archive -Path dist/LLyrics/* -DestinationPath LLyrics-windows.zip
 
       - name: Notas da versão

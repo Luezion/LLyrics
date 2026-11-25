@@ -90,3 +90,36 @@ class HotkeyFilter(QAbstractNativeEventFilter):
                     cb()
                     return True, 0
         return False, 0
+
+
+RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+
+
+def autostart_command():
+    if getattr(sys, "frozen", False):
+        return f'"{sys.executable}"'
+    import os
+    base = os.path.dirname(os.path.abspath(__file__))
+    pyw = os.path.join(base, ".venv", "Scripts", "pythonw.exe")
+    if not os.path.exists(pyw):
+        pyw = sys.executable.replace("python.exe", "pythonw.exe")
+    return f'"{pyw}" "{os.path.join(base, "main.py")}"'
+
+
+def set_autostart(on):
+    """Liga/desliga abrir junto com o Windows (registro do usuário, sem precisar de administrador)."""
+    if not IS_WIN:
+        return False
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as k:
+            if on:
+                winreg.SetValueEx(k, "LLyrics", 0, winreg.REG_SZ, autostart_command())
+            else:
+                try:
+                    winreg.DeleteValue(k, "LLyrics")
+                except FileNotFoundError:
+                    pass
+        return True
+    except OSError:
+        return False

@@ -2,6 +2,11 @@
 
 <!-- A versão mais nova fica em cima. O texto da primeira seção aparece na tela de atualização do app. -->
 
+## 1.0.1
+
+- LEIA-ME do .exe sem os passos de instalar Python (não precisa)
+- Nova opção "Abrir junto com o Windows" nas configurações
+
 ## 1.0.0
 
 - Primeira versão pública

@@ -188,6 +188,7 @@ DEFAULTS = {
     "screen_index": 0,
     # Atualizações
     "auto_update": True,
+    "autostart": False,
     "skip_version": "",
 }
 

@@ -91,6 +91,7 @@ class SettingsWindow(QWidget):
             ("screen_index", "Monitor", ("choice", screens)),
             ("fps", "Quadros por segundo", ("choice", [(30, "30"), (60, "60"), (120, "120"), (144, "144")])),
             ("auto_update", "Procurar atualizações sozinho", "bool"),
+            ("autostart", "Abrir junto com o Windows", "bool"),
         ], "Aleatória: cada linha nova aparece num lugar diferente da tela.\n"
            "Desligue \"Pode aparecer no centro\" em jogos de tiro para a letra nunca cobrir a mira "
            "(a área livre aumenta ou diminui no controle acima).\n"
@@ -260,6 +261,9 @@ class SettingsWindow(QWidget):
     # ------------------------------------------------------------ ações
     def _set(self, key, value):
         self.cfg[key] = value
+        if key == "autostart":
+            import winutil
+            winutil.set_autostart(bool(value))
         self.ctl.apply_config()
         self._save_timer.start()
 

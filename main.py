@@ -64,6 +64,8 @@ def main():
 
     render.load_fonts()
     cfg = Config()
+    if cfg.get("autostart"):
+        winutil.set_autostart(True)  # mantém o caminho certo se a pasta mudou
     ctl = Controller(cfg)
     settings = SettingsWindow(ctl)
     icon = make_icon()
