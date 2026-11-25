@@ -2,6 +2,11 @@
 
 <!-- A versão mais nova fica em cima. O texto da primeira seção aparece na tela de atualização do app. -->
 
+## 1.0.2
+
+- Corrige a atualização automática: não abre mais uma janela preta e não trava esperando o app fechar
+- O app agora fecha de verdade ao clicar em Sair
+
 ## 1.0.1
 
 - LEIA-ME do .exe sem os passos de instalar Python (não precisa)

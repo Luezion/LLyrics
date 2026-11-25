@@ -100,7 +100,13 @@ def main():
     tray.show()
 
     # atualizações automáticas
-    updater = Updater(cfg, app.quit, lambda msg: tray.showMessage("LLyrics", msg, icon, 5000))
+    def quit_now():
+        QTimer.singleShot(0, app.quit)
+        QTimer.singleShot(4000, lambda: os._exit(0))  # garantia, se algo travar no fechamento
+
+    act_quit.triggered.disconnect()
+    act_quit.triggered.connect(quit_now)
+    updater = Updater(cfg, quit_now, lambda msg: tray.showMessage("LLyrics", msg, icon, 5000))
     ctl.updater = updater
     act_update.triggered.connect(lambda: updater.check(manual=True))
     QTimer.singleShot(5000, updater.check)
@@ -142,7 +148,10 @@ def main():
     app.aboutToQuit.connect(cleanup)
     code = app.exec()
     lock.unlock()
-    return code
+    # sai na hora: a thread que lê o player (WinRT) às vezes segura o processo aberto,
+    # e o atualizador precisa que o app feche de verdade para trocar os arquivos
+    sys.stdout and sys.stdout.flush()
+    os._exit(code)
 
 
 if __name__ == "__main__":

@@ -136,15 +136,28 @@ def _write_script(tmp, src):
     lines = [
         "@echo off",
         "chcp 65001 >nul",
+        "set n=0",
         ":espera",
-        f'tasklist /FI "PID eq {pid}" 2>nul | find " {pid} " >nul && (timeout /t 1 /nobreak >nul & goto espera)',
+        # espera o app antigo fechar; se travar, fecha à força depois de ~15 s
+        f'tasklist /FI "PID eq {pid}" /NH 2>nul | find " {pid} " >nul || goto pronto',
+        "set /a n+=1",
+        f"if %n% geq 15 taskkill /PID {pid} /F >nul 2>&1",
+        "ping -n 2 127.0.0.1 >nul",
+        "goto espera",
+        ":pronto",
+        "ping -n 2 127.0.0.1 >nul",
         f'robocopy "{src}" "{APP_DIR}" /E /XD .git .venv /R:5 /W:1 /NFL /NDL /NJH /NJS /NP >nul',
         restart,
         f'(goto) 2>nul & rmdir /s /q "{tmp}"',
     ]
     with open(bat, "w", encoding="utf-8") as f:
         f.write("\r\n".join(lines) + "\r\n")
-    return bat
+    # roda o .bat escondido (sem janela preta), mesmo com o Terminal do Windows 11
+    vbs = os.path.join(tmp, "aplicar.vbs")
+    with open(vbs, "w", encoding="utf-16") as f:
+        f.write('CreateObject("WScript.Shell").Run "cmd /c """ & "' + bat.replace('"', '""')
+                + '" & """", 0, False\r\n')
+    return vbs
 
 
 def can_write_app_dir():
@@ -268,10 +281,8 @@ class UpdateDialog(QDialog):
                 b.setEnabled(True)
             return
         self.msg.setText("Instalando e reabrindo o LLyrics…")
-        flags = 0
-        if sys.platform == "win32":
-            flags = subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
-        subprocess.Popen(["cmd", "/c", info], creationflags=flags, close_fds=True)
+        flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+        subprocess.Popen(["wscript.exe", "//B", "//Nologo", info], creationflags=flags, close_fds=True)
         self.on_quit()
 
 
