@@ -90,6 +90,7 @@ DEFAULTS = {
     # Geral
     "show_lyrics": True,
     "hide_paused": True,
+    "settings_preview": True,
     "sync_offset": 0.0,          # segundos (+ adianta a letra)
     "fps": 60,
     # Letras / animação

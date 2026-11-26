@@ -498,7 +498,7 @@ class SettingsWindow(QWidget):
         v = self._page("◎", tr("page.general"), tr("page.general.sub"))
         self._card(v, tr("card.language"), [("language", ("choice", i18n.LANGUAGES))])
         self._card(v, tr("card.display"), [("show_lyrics", "bool"), ("show_widget", "bool"),
-                                           ("hide_paused", "bool")])
+                                           ("hide_paused", "bool"), ("settings_preview", "bool")])
         self._card(v, tr("card.position"), [
             ("position_mode", ("choice", C(POSITION_MODES))),
             ("allow_center", "bool"),
@@ -962,6 +962,8 @@ class SettingsWindow(QWidget):
             if getattr(self.ctl, "language_changed", None):
                 self.ctl.language_changed()
             return
+        if key == "settings_preview" and self.isVisible():
+            self.ctl.demo = bool(value)
         if key == "autostart":
             import winutil
             winutil.set_autostart(bool(value))
@@ -1060,7 +1062,7 @@ class SettingsWindow(QWidget):
 
     def showEvent(self, e):
         super().showEvent(e)
-        self.ctl.demo = True
+        self.ctl.demo = bool(self.cfg.get("settings_preview", True))
 
     def closeEvent(self, e):
         for f in self.fields.values():

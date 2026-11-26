@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.5.1
+
+### English
+- New option to turn off the overlay preview while settings are open (Settings > General > Display)
+
+### Español
+- Nueva opción para desactivar la vista previa del overlay con los ajustes abiertos (Ajustes > General > Pantalla)
+
+### Português
+- Nova opção para desligar a prévia do overlay com as configurações abertas (Configurações > Geral > Exibição)
+
 ## 1.5.0
 
 ### English
