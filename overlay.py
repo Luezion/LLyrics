@@ -224,6 +224,7 @@ class Controller(QObject):
             self.cover = render.cover_pixmap(snap.thumb)
             self.album_color = render.album_accent(snap.thumb)
             self.cover_bytes = snap.thumb
+            self._gen_variant = 0
             self.style_override = {}
             self.style_summary = None
             self._fetch(snap)
@@ -270,7 +271,7 @@ class Controller(QObject):
             self.generate_style(permanent=False)
 
     # ------------------------------------------------------------ estilo da música
-    def generate_style(self, permanent=True):
+    def generate_style(self, permanent=True, new_variant=False):
         """Cria um estilo para a música atual. permanent=True grava como o estilo do usuário."""
         if self.snap is None or not self.snap.title:
             if self.on_style_generated:
@@ -279,6 +280,10 @@ class Controller(QObject):
         import autostyle
         tid, title, artist = self.track_id, self.snap.title, self.snap.artist
         lines, cover = list(self.lines), self.cover_bytes
+        if new_variant:
+            self._gen_variant = getattr(self, "_gen_variant", 0) + 1
+        variant = getattr(self, "_gen_variant", 0)
+        prefs = {k: v for k, v in self.cfg.items() if k.startswith("gen_")}
 
         def work():
             try:
@@ -286,7 +291,7 @@ class Controller(QObject):
             except Exception:  # noqa: BLE001
                 fam = None
             try:
-                style, summary = autostyle.generate(title, artist, lines, cover, fam)
+                style, summary = autostyle.generate(title, artist, lines, cover, fam, prefs, variant)
             except Exception as e:  # noqa: BLE001
                 print("[autostyle]", repr(e))
                 return

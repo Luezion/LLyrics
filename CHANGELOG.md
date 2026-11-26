@@ -4,6 +4,23 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.9.0
+
+### English
+- New **Generator** page to control how styles are created: smallest and largest text size, motion intensity and speed (or no motion at all), allow or block shaking, party mode, sparkles, glow and outline, where the colours come from and how strong they are, capitals, karaoke, variety, and which layouts and fonts can be used
+- "Another option" button: a different look for the same song
+- With "New style on every song" on, changes in the Generator apply right away
+
+### Español
+- Nueva página **Generador** para controlar cómo se crean los estilos: tamaño mínimo y máximo del texto, intensidad y velocidad del movimiento (o sin movimiento), permitir o bloquear temblor, modo fiesta, destellos, brillo y contorno, de dónde salen los colores y su intensidad, mayúsculas, karaoke, variedad y qué diseños y fuentes se pueden usar
+- Botón "Otra opción": un look distinto para la misma canción
+- Con "Estilo nuevo en cada canción" activado, los cambios del Generador se aplican al instante
+
+### Português
+- Nova aba **Gerador** para controlar como os estilos são criados: tamanho mínimo e máximo da letra, intensidade e velocidade do movimento (ou sem movimento), permitir ou bloquear tremer, modo festa, brilhinhos, brilho e contorno, de onde vêm as cores e a intensidade delas, maiúsculas, karaokê, variedade e quais layouts e fontes podem ser usados
+- Botão "Outra opção": um visual diferente para a mesma música
+- Com o "Estilo novo a cada música" ligado, as mudanças no Gerador aparecem na hora
+
 ## 1.8.0
 
 ### English

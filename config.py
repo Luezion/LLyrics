@@ -79,6 +79,9 @@ WIDGET_POSITIONS = [(k, f"wpos.{k}") for k in ("top_left", "top_right", "bottom_
 WIDGET_LAYOUTS = [(k, f"wlayout.{k}") for k in ("card", "sticker")]
 COVER_STYLES = [(k, f"cover.{k}") for k in ("rounded", "square", "circle", "vinyl")]
 
+GEN_COLOURS = [(k, f"gencol.{k}") for k in ("cover", "recipe", "mine")]
+GEN_TRISTATE = [(k, f"tri.{k}") for k in ("auto", "always", "never")]
+
 HOTKEY_DEFAULTS = {
     "hotkey_toggle": "Ctrl+Shift+L",
     "hotkey_move": "Ctrl+Shift+K",
@@ -113,6 +116,25 @@ DEFAULTS = {
     "party": False,
     "party_effects": "both",
     "auto_style": False,          # estilo automático a cada música
+    # Preferências do gerador de estilos
+    "gen_min_size": 26,
+    "gen_max_size": 56,
+    "gen_motion": 1.0,
+    "gen_motion_speed": 1.0,
+    "gen_shake": True,
+    "gen_party": True,
+    "gen_sparkle": True,
+    "gen_glow": True,
+    "gen_outline": True,
+    "gen_colours": "cover",
+    "gen_saturation": 1.0,
+    "gen_uppercase": "auto",
+    "gen_karaoke": "auto",
+    "gen_variety": 1.0,
+    "gen_layouts": ["lines", "stack", "words", "words_tilted", "arc", "snake", "spotlight", "scatter", "poster",
+                    "punchline", "tilted"],
+    "gen_fonts": ["pixelify", "bebas", "poppins", "montserrat", "righteous", "pacifico", "lobster", "playfair",
+                  "eagle_lake", "comic_relief", "press_start"],
     # Estilo do texto
     "accent": "album",
     "colour_mode": "solid",

@@ -19,7 +19,7 @@ import lookcode
 import looks
 import mystyles
 import render
-from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, COVER_STYLES, EXITS, WIDGET_LAYOUTS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
+from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, COVER_STYLES, EXITS, GEN_COLOURS, GEN_TRISTATE, WIDGET_LAYOUTS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
                     PARTY_EFFECTS, POSITION_MODES, WIDGET_POSITIONS)
 from i18n import tr
 from version import UPDATE_REPO, __version__
@@ -72,6 +72,8 @@ QScrollBar:vertical {{ background: transparent; width: 8px; margin: 4px; }}
 QScrollBar::handle:vertical {{ background: #2E2E3B; border-radius: 4px; min-height: 30px; }}
 QScrollBar::add-line, QScrollBar::sub-line {{ height: 0; }}
 #card {{ background: {CARD}; border: 1px solid {LINE}; border-radius: 14px; }}
+QPushButton#toggleChip {{ border-radius: 15px; padding: 6px 12px; background: #22222D; color: {MUTED}; }}
+QPushButton#toggleChip:checked {{ background: #34294A; color: {TEXT}; border: 1px solid {ACC}; }}
 #lookCard {{ background: #20202A; border: 1px solid {LINE}; border-radius: 12px; }}
 #lookCard QLabel {{ background: transparent; }}
 #cardTitle {{ font-size: 12px; font-weight: 700; color: {ACC}; letter-spacing: 1px; }}
@@ -358,6 +360,8 @@ class SettingsWindow(QWidget):
         self.rows = {}           # chave -> widget da linha (para esconder/mostrar)
         self._save_timer = QTimer(self, singleShot=True, interval=400)
         self._save_timer.timeout.connect(self.cfg.save)
+        self._regen_timer = QTimer(self, singleShot=True, interval=500)
+        self._regen_timer.timeout.connect(lambda: self.ctl.generate_style(permanent=False))
         ctl.config_changed_externally = self.refresh
         self._bridge = _Bridge()
         self._bridge.done.connect(self._import_done)
@@ -436,6 +440,7 @@ class SettingsWindow(QWidget):
         self.nav.addItem(QListWidgetItem(f"{icon}   {title}"))
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setFrameShape(QFrame.NoFrame)
         inner = QWidget()
         inner.setObjectName("page")
@@ -536,24 +541,6 @@ class SettingsWindow(QWidget):
         v.addStretch(1)
 
         v = self._page("◐", tr("page.style"), tr("page.style.sub"))
-        cv = self._card(v, tr("card.autostyle"))
-        cap = QLabel(tr("autostyle.caption"))
-        cap.setObjectName("caption")
-        cap.setWordWrap(True)
-        cv.addWidget(cap)
-        row = QHBoxLayout()
-        self.autostyle_msg = QLabel("")
-        self.autostyle_msg.setObjectName("caption")
-        self.autostyle_msg.setWordWrap(True)
-        row.addWidget(self.autostyle_msg, 1)
-        gen = QPushButton(tr("btn.autostyle"))
-        gen.setObjectName("primary")
-        gen.setCursor(Qt.PointingHandCursor)
-        gen.clicked.connect(self._generate_style)
-        row.addWidget(gen)
-        cv.addLayout(row)
-        cv.addWidget(self._row("auto_style", "bool"))
-
         cv = self._card(v, tr("card.presets"))
         grid = QGridLayout()
         grid.setSpacing(8)
@@ -614,6 +601,58 @@ class SettingsWindow(QWidget):
             ("background", "bool"),
             ("lyrics_opacity", ("slider", 0.15, 1.0, 0.05, "")),
         ])
+        v.addStretch(1)
+
+        v = self._page("✺", tr("page.generator"), tr("page.generator.sub"))
+        cv = self._card(v, tr("card.autostyle"))
+        cap = QLabel(tr("autostyle.caption"))
+        cap.setObjectName("caption")
+        cap.setWordWrap(True)
+        cv.addWidget(cap)
+        row = QHBoxLayout()
+        self.autostyle_msg = QLabel("")
+        self.autostyle_msg.setObjectName("caption")
+        self.autostyle_msg.setWordWrap(True)
+        row.addWidget(self.autostyle_msg, 1)
+        again = QPushButton(tr("btn.another"))
+        again.setCursor(Qt.PointingHandCursor)
+        again.clicked.connect(lambda: self._generate_style(new_variant=True))
+        gen = QPushButton(tr("btn.autostyle"))
+        gen.setObjectName("primary")
+        gen.setCursor(Qt.PointingHandCursor)
+        gen.clicked.connect(self._generate_style)
+        row.addWidget(again)
+        row.addWidget(gen)
+        cv.addLayout(row)
+        cv.addWidget(self._row("auto_style", "bool"))
+        cv.addWidget(self._row("gen_variety", ("slider", 0.0, 2.0, 0.1, "x")))
+        self._card(v, tr("card.gen_size"), [
+            ("gen_min_size", ("slider", 16, 80, 1, "px")),
+            ("gen_max_size", ("slider", 20, 120, 1, "px")),
+        ])
+        self._card(v, tr("card.gen_motion"), [
+            ("gen_motion", ("slider", 0.0, 2.0, 0.05, "x")),
+            ("gen_motion_speed", ("slider", 0.2, 2.5, 0.05, "x")),
+            ("gen_shake", "bool"),
+        ])
+        self._card(v, tr("card.gen_effects"), [("gen_party", "bool"), ("gen_sparkle", "bool"),
+                                                ("gen_glow", "bool"), ("gen_outline", "bool")])
+        self._card(v, tr("card.gen_colours"), [
+            ("gen_colours", ("choice", C(GEN_COLOURS))),
+            ("gen_saturation", ("slider", 0.3, 1.5, 0.05, "x")),
+        ])
+        self._card(v, tr("card.gen_text"), [
+            ("gen_uppercase", ("choice", C(GEN_TRISTATE))),
+            ("gen_karaoke", ("choice", C(GEN_TRISTATE))),
+        ])
+        cv = self._card(v, tr("card.gen_layouts"))
+        cv.addWidget(self._multi("gen_layouts", C(LAYOUTS)))
+        cv = self._card(v, tr("card.gen_fonts"))
+        cv.addWidget(self._multi("gen_fonts", C([(k, n) for k, n, _ in FONTS if k != "system"])))
+        mc = QLabel(tr("gen.multi_caption"))
+        mc.setObjectName("caption")
+        mc.setWordWrap(True)
+        cv.addWidget(mc)
         v.addStretch(1)
 
         v = self._page("❖", tr("page.mystyles"), tr("page.mystyles.sub"))
@@ -761,6 +800,29 @@ class SettingsWindow(QWidget):
         cv.addWidget(credits)
         v.addStretch(1)
 
+    def _multi(self, key, options):
+        """Vários botões liga/desliga (escolha múltipla), guardados como lista."""
+        box = QWidget()
+        grid = QGridLayout(box)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setSpacing(8)
+        buttons = {}
+        for i, (val, name) in enumerate(options):
+            b = QPushButton(tr(f"chip.{val}") if f"chip.{val}" in i18n.S else name.split(" (")[0])
+            b.setToolTip(name)
+            b.setObjectName("toggleChip")
+            b.setMinimumWidth(10)
+            b.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
+            b.setCheckable(True)
+            b.setCursor(Qt.PointingHandCursor)
+            b.setChecked(val in (self.cfg.get(key) or []))
+            b.toggled.connect(lambda _=False, k=key: self._set(
+                k, [v for v, btn in self.fields[k][1].items() if btn.isChecked()]))
+            grid.addWidget(b, i // 4, i % 4)
+            buttons[val] = b
+        self.fields[key] = ("multi", buttons)
+        return box
+
     # ------------------------------------------------------------ campos
     def _field(self, key, kind):
         cfg = self.cfg
@@ -838,8 +900,8 @@ class SettingsWindow(QWidget):
             self._gallery_loaded = True
             self._load_gallery()
 
-    def _generate_style(self):
-        if self.ctl.generate_style(permanent=True):
+    def _generate_style(self, new_variant=False):
+        if self.ctl.generate_style(permanent=not self.cfg.get("auto_style"), new_variant=new_variant):
             self.autostyle_msg.setText(tr("autostyle.working"))
         else:
             self.autostyle_msg.setText(tr("autostyle.need_song"))
@@ -1103,6 +1165,8 @@ class SettingsWindow(QWidget):
             "outline_colour": c["outline"],
             "outline_thickness": c["outline"],
             "widget_progress": c.get("widget_layout") == "sticker",
+            "gen_motion_speed": c.get("gen_motion", 1.0) > 0.01,
+            "gen_shake": c.get("gen_motion", 1.0) > 0.01,
         }
         for key, show in rules.items():
             if key in self.rows:
@@ -1145,6 +1209,8 @@ class SettingsWindow(QWidget):
             if getattr(self.ctl, "language_changed", None):
                 self.ctl.language_changed()
             return
+        if key.startswith("gen_") and self.cfg.get("auto_style") and self.ctl.snap is not None:
+            self._regen_timer.start()
         if key == "auto_style":
             if value and self.ctl.snap is not None:
                 self.ctl.generate_style(permanent=False)
@@ -1231,6 +1297,12 @@ class SettingsWindow(QWidget):
     def refresh(self):
         for key, f in self.fields.items():
             kind, w = f[0], f[1]
+            if kind == "multi":
+                for val, b in w.items():
+                    b.blockSignals(True)
+                    b.setChecked(val in (self.cfg.get(key) or []))
+                    b.blockSignals(False)
+                continue
             w.blockSignals(True)
             if kind == "bool":
                 w.setChecked(bool(self.cfg[key]))

@@ -373,31 +373,95 @@ def _paint(treatment, palette, rnd):
     return cols, outline
 
 
-def generate(title, artist, lines, cover_bytes=None, family=None):
-    """Devolve (estilo, resumo). resumo = dict(family, mood, energy, cover, look)."""
-    seed = hashlib.sha1(f"{_norm(artist)}|{_norm(title)}".encode("utf-8")).hexdigest()
+_FONT_CLASS = {
+    "pixelify": "pixel", "press_start": "pixel", "bebas": "display", "righteous": "display",
+    "comic_relief": "display", "montserrat": "sans", "poppins": "sans", "pacifico": "script",
+    "lobster": "script", "playfair": "serif", "eagle_lake": "serif",
+}
+
+
+def _apply_prefs(st, prefs, recipe, rnd, palette):
+    """Respeita as escolhas da aba Gerador (tamanho, movimento, efeitos, cores…)."""
+    if not prefs:
+        return st
+    fonts = prefs.get("gen_fonts") or list(_FONT_CLASS)
+    if st["font"] not in fonts:
+        same = [f for f in fonts if _FONT_CLASS.get(f) == _FONT_CLASS.get(st["font"])]
+        st["font"] = rnd.choice(same or fonts)
+    lo, hi = int(prefs.get("gen_min_size", 26)), int(prefs.get("gen_max_size", 56))
+    if lo > hi:
+        lo, hi = hi, lo
+    base = st.get("text_size", 44)
+    if st["font"] == "press_start":
+        base = min(base, 30)
+    st["text_size"] = max(lo, min(hi, base))
+    motion = float(prefs.get("gen_motion", 1.0))
+    if motion <= 0.01:
+        st["idle"] = "none"
+    else:
+        if st["idle"] == "shake" and not prefs.get("gen_shake", True):
+            st["idle"] = rnd.choice(["float", "bounce", "pulse"])
+        st["idle_strength"] = round(max(0.05, min(3.0, st["idle_strength"] * motion)), 2)
+        st["idle_speed"] = round(max(0.05, min(3.0, st["idle_speed"] * float(prefs.get("gen_motion_speed", 1.0)))), 2)
+    for flag, key in (("gen_party", "party"), ("gen_sparkle", "sparkle"), ("gen_glow", "glow"),
+                      ("gen_outline", "outline")):
+        if not prefs.get(flag, True):
+            st[key] = False
+    if not st["outline"] and not st["glow"]:
+        st["drop_shadow"] = True  # continua legível por cima do jogo
+    up = prefs.get("gen_uppercase", "auto")
+    if up != "auto":
+        st["uppercase"] = up == "always"
+    kar = prefs.get("gen_karaoke", "auto")
+    if kar != "auto":
+        st["karaoke"] = kar == "always"
+    src = prefs.get("gen_colours", "cover")
+    if src == "mine":
+        for k in ("accent", "custom_colour", "second_colour", "third_colour", "colour_mode", "outline_colour"):
+            st.pop(k, None)
+    sat = float(prefs.get("gen_saturation", 1.0))
+    if abs(sat - 1.0) > 0.01:
+        for k in ("custom_colour", "second_colour", "third_colour"):
+            if k in st:
+                h, s_, v = _hsv(st[k])
+                st[k] = _hex(h, s_ * sat, v)
+    return st
+
+
+def generate(title, artist, lines, cover_bytes=None, family=None, prefs=None, variant=0):
+    """Devolve (estilo, resumo). resumo = dict(family, mood, energy, cover, look).
+    prefs: preferências da aba Gerador. variant: outra opção para a mesma música."""
+    prefs = prefs or {}
+    seed = hashlib.sha1(f"{_norm(artist)}|{_norm(title)}|{variant}".encode("utf-8")).hexdigest()
     rnd = random.Random(seed)
     energy = lyric_energy(lines) if lines else 0.5
     mood, _ = lyric_mood(lines) if lines else (None, {})
     palette, dark_cover = cover_palette(cover_bytes)
+    if prefs.get("gen_colours") == "recipe":
+        palette = []
     elevel = "high" if energy > 0.6 else "low" if energy < 0.3 else "mid"
     fam = family or "pop"
 
+    allowed = prefs.get("gen_layouts") or None
+    pool = [r for r in RECIPES if not allowed or r["style"]["layout"] in allowed] or list(RECIPES)
+    variety = float(prefs.get("gen_variety", 1.0))
     scored = []
-    for r in RECIPES:
+    for r in pool:
         score = 0.0
         score += 2.0 if fam in r["fam"].split() else 0.0
         score += 2.2 if mood and mood in r["mood"].split() else (0.3 if not mood else -0.6)
         score += 1.2 if elevel in r["energy"].split() else -0.8
         if r["dark"] is not None:
             score += 0.5 if r["dark"] == dark_cover else -0.3
-        score += rnd.random() * 1.1  # variedade: músicas parecidas não ficam todas iguais
+        score += rnd.random() * 1.1 * variety  # variedade: músicas parecidas não ficam todas iguais
         scored.append((score, r))
     scored.sort(key=lambda x: x[0], reverse=True)
     recipe = scored[0][1]
 
     st = dict(_BASE)
     st.update(recipe["style"])
+    if allowed and st["layout"] not in allowed:
+        st["layout"] = rnd.choice(allowed)
     cols, outline = _paint(recipe["colour"], palette, rnd)
     if recipe["colour"] == "rainbow":
         st.update(accent="custom", custom_colour=cols[0], colour_mode="rainbow_flow")
@@ -416,6 +480,7 @@ def generate(title, artist, lines, cover_bytes=None, family=None):
         st["party"] = rnd.random() < 0.5
     if mood == "sad":
         st["party"] = False
+    st = _apply_prefs(st, prefs, recipe, rnd, palette)
 
     summary = {"family": family, "mood": mood, "cover": bool(palette), "energy": elevel,
                "look": recipe["name"]}

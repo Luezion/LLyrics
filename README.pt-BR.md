@@ -24,7 +24,7 @@ Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra d
 - Movimento parado (tremer, onda, pulinho, pulsar, flutuar, balançar), brilhinhos e modo festa
 - Contorno, sombra, brilho e fundo; 12 fontes livres (Google Fonts)
 - **Meus estilos**: salve seus visuais no PC e troque entre eles com um clique (também pelo menu da bandeja)
-- **Estilo para esta música**: um visual gerado a partir do ritmo, da letra, do gênero do artista ([MusicBrainz](https://musicbrainz.org)) e das cores da capa, uma vez ou a cada música
+- **Estilo para esta música**: um visual gerado a partir do ritmo, da letra, do gênero do artista ([MusicBrainz](https://musicbrainz.org)) e das cores da capa, uma vez ou a cada música, com uma aba **Gerador** para definir tamanhos, movimento, efeitos, cores, layouts e fontes
 - Estilos prontos, incluindo "Shake" e "Void Echoes", e importação de looks do site da comunidade do mod pelo código `STL-XXXXXX`
 
 ### Posição

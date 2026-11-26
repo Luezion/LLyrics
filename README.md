@@ -36,7 +36,7 @@ When a new version comes out, the app shows a window to update with one click.
 - Idle motion (shake, wave, bounce, pulse, float, sway), sparkles and party mode
 - Outline, shadow, glow and background; 12 free fonts (Google Fonts)
 - **My styles**: save your looks on your PC and switch between them with one click (also from the tray menu)
-- **Style for this song**: a look generated from the song's rhythm, lyrics, the artist's genre ([MusicBrainz](https://musicbrainz.org)) and the cover colours, once or on every song
+- **Style for this song**: a look generated from the song's rhythm, lyrics, the artist's genre ([MusicBrainz](https://musicbrainz.org)) and the cover colours, once or on every song, with a **Generator** page to set size limits, motion, effects, colours, layouts and fonts
 - Ready-made styles, including "Shake" and "Void Echoes", and importing looks from the mod's community site with a `STL-XXXXXX` code
 
 ### Position
