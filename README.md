@@ -52,6 +52,16 @@ Default shortcuts. You can change them in **Settings → Shortcuts**.
 | Ctrl+Shift+K | Move the windows |
 | Ctrl+Shift+O | Settings |
 
+## Community
+
+Share your styles and try the ones other players made, in **Settings → Community**:
+
+- **Copy code**: turns your current look into a code (`LLY1-…`) you can send to anyone. They paste it in *Style → Community looks → Import*.
+- **Publish to community**: opens a GitHub form already filled in. Once approved, the style shows up in everyone's gallery.
+- **Community gallery**: browse, preview and apply styles with one click.
+
+Looks from the mod's site ([lyrics.remake.lol](https://lyrics.remake.lol/)) can be imported too (`STL-…` codes), but publishing there is only possible from inside Minecraft with the mod.
+
 ## In games (Valorant and others)
 
 Set the game to **windowed fullscreen** (borderless). In exclusive fullscreen no overlay can appear on top.
@@ -87,6 +97,8 @@ All the app's text lives in `i18n.py`. To add a language, copy the English colum
 | `i18n.py` | Translations (English, Español, Português) |
 | `hotkeys.py` | Configurable global shortcuts |
 | `looks.py` | Imports looks from the mod's site |
+| `community.py` | Community gallery and sharing |
+| `lookcode.py` | Style codes (`LLY1-…`) |
 | `updater.py` | Checks for a new version and updates the app |
 | `config.py` | Options and defaults |
 | `version.py` | Version number |

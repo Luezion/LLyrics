@@ -205,9 +205,9 @@ S = {
     "footer.tip": ("Changes apply instantly", "Los cambios se aplican al instante", "As mudanças aparecem na hora"),
     "btn.import": ("Import", "Importar", "Importar"),
     "btn.check_updates": ("Check for updates", "Buscar actualizaciones", "Procurar atualizações"),
-    "import.placeholder": ("Paste a look's code or link (e.g. STL-JMQZYC)",
-                           "Pega el código o el enlace de un look (ej.: STL-JMQZYC)",
-                           "Cole o código ou o link de um look (ex.: STL-JMQZYC)"),
+    "import.placeholder": ("Paste an LLyrics code (LLY1-…) or a mod look (STL-…)",
+                           "Pega un código de LLyrics (LLY1-…) o un look del mod (STL-…)",
+                           "Cole um código do LLyrics (LLY1-…) ou um look do mod (STL-…)"),
     "import.searching": ("Fetching the look…", "Buscando el look…", "Buscando o look…"),
     "import.by": (" by {author}", " de {author}", " de {author}"),
     "import.applied": ("✓ Look {name} applied. Minecraft-only things (3D, PvP) are left out.",
@@ -236,6 +236,62 @@ S = {
     "credits.fonts": ("Fonts: Google Fonts, SIL Open Font License",
                       "Fuentes: Google Fonts, licencia SIL Open Font License",
                       "Fontes: Google Fonts, licença SIL Open Font License"),
+
+
+    # ------------------------------------------------------------------ comunidade
+    "page.community": ("Community", "Comunidad", "Comunidade"),
+    "page.community.sub": ("Share your styles and try the ones other players made.",
+                           "Comparte tus estilos y prueba los que hicieron otros jugadores.",
+                           "Compartilhe seus estilos e teste os que outros jogadores fizeram."),
+    "card.share": ("Share your style", "Comparte tu estilo", "Compartilhe seu estilo"),
+    "share.caption": ("Your current look (colours, font, animations and effects) becomes a code. "
+                      "Position, shortcuts and language are never included.",
+                      "Tu look actual (colores, fuente, animaciones y efectos) se convierte en un código. "
+                      "Nunca se incluyen la posición, los atajos ni el idioma.",
+                      "O seu visual atual (cores, fonte, animações e efeitos) vira um código. "
+                      "Posição, atalhos e idioma nunca vão junto."),
+    "share.name_ph": ("Style name", "Nombre del estilo", "Nome do estilo"),
+    "share.author_ph": ("Your name or nickname", "Tu nombre o apodo", "Seu nome ou apelido"),
+    "share.desc_ph": ("Short description (optional)", "Descripción corta (opcional)", "Descrição curta (opcional)"),
+    "share.copy": ("Copy code", "Copiar código", "Copiar código"),
+    "share.publish": ("Publish to community", "Publicar en la comunidad", "Publicar na comunidade"),
+    "share.copied": ("✓ Code copied. Anyone can paste it in Style > Community looks > Import.",
+                     "✓ Código copiado. Cualquiera puede pegarlo en Estilo > Looks de la comunidad > Importar.",
+                     "✓ Código copiado. Qualquer pessoa pode colar em Estilo > Looks da comunidade > Importar."),
+    "share.need_name": ("Give your style a name first.", "Primero ponle un nombre a tu estilo.",
+                        "Dê um nome ao seu estilo primeiro."),
+    "share.opened": ("The form opened in your browser. Sign in to GitHub and click \"Create\". "
+                     "Your style shows up in the gallery once it's approved.",
+                     "El formulario se abrió en tu navegador. Inicia sesión en GitHub y haz clic en \"Create\". "
+                     "Tu estilo aparecerá en la galería cuando sea aprobado.",
+                     "O formulário abriu no seu navegador. Entre no GitHub e clique em \"Create\". "
+                     "Seu estilo aparece na galeria quando for aprovado."),
+    "card.gallery": ("Community gallery", "Galería de la comunidad", "Galeria da comunidade"),
+    "gallery.search": ("Search styles…", "Buscar estilos…", "Buscar estilos…"),
+    "gallery.refresh": ("Refresh", "Actualizar", "Atualizar"),
+    "gallery.loading": ("Loading styles…", "Cargando estilos…", "Carregando estilos…"),
+    "gallery.error": ("Couldn't load the gallery ({e}).", "No se pudo cargar la galería ({e}).",
+                      "Não deu para carregar a galeria ({e})."),
+    "gallery.empty": ("No styles yet. Be the first to publish one!",
+                      "Todavía no hay estilos. ¡Sé el primero en publicar uno!",
+                      "Ainda não tem estilos. Seja o primeiro a publicar!"),
+    "gallery.none_found": ("No style matches your search.", "Ningún estilo coincide con tu búsqueda.",
+                           "Nenhum estilo bate com a busca."),
+    "gallery.apply": ("Apply", "Aplicar", "Aplicar"),
+    "gallery.by": ("by {author}", "de {author}", "de {author}"),
+    "gallery.applied": ("✓ Style \"{name}\" applied.", "✓ Estilo \"{name}\" aplicado.",
+                        "✓ Estilo \"{name}\" aplicado."),
+    "gallery.sample": ("Sing it loud tonight", "Cántalo fuerte esta noche", "Canta bem alto essa noite"),
+    "gallery.mod_note": ("Looks from the mod's site (lyrics.remake.lol) can be imported in Style, but publishing "
+                         "there is only possible from inside Minecraft with the mod.",
+                         "Los looks del sitio del mod (lyrics.remake.lol) se pueden importar en Estilo, pero publicar "
+                         "allí solo es posible desde Minecraft con el mod.",
+                         "Os looks do site do mod (lyrics.remake.lol) podem ser importados em Estilo, mas publicar "
+                         "lá só é possível de dentro do Minecraft, com o mod."),
+    "import.llyrics_applied": ("✓ LLyrics style applied.", "✓ Estilo de LLyrics aplicado.",
+                               "✓ Estilo do LLyrics aplicado."),
+    "import.bad_llyrics": ("This LLyrics code is broken or incomplete.", "Este código de LLyrics está roto o incompleto.",
+                           "Esse código do LLyrics está quebrado ou incompleto."),
 
     # ------------------------------------------------------------------ escolhas
     "accent.album": ("Album (cover colour)", "Álbum (color de la portada)", "Álbum (cor da capa)"),

@@ -52,6 +52,16 @@ Atajos por defecto. Puedes cambiarlos en **Ajustes → Atajos**.
 | Ctrl+Shift+K | Mover las ventanas |
 | Ctrl+Shift+O | Ajustes |
 
+## Comunidad
+
+Comparte tus estilos y prueba los que hicieron otros jugadores, en **Ajustes → Comunidad**:
+
+- **Copiar código**: convierte tu look actual en un código (`LLY1-…`) que puedes enviar a quien quieras. Se pega en *Estilo → Looks de la comunidad → Importar*.
+- **Publicar en la comunidad**: abre un formulario de GitHub ya completado. Cuando se aprueba, el estilo aparece en la galería de todos.
+- **Galería de la comunidad**: explora, mira la vista previa y aplica estilos con un clic.
+
+Los looks del sitio del mod ([lyrics.remake.lol](https://lyrics.remake.lol/)) también se pueden importar (códigos `STL-…`), pero publicar allí solo es posible desde Minecraft con el mod.
+
 ## En juegos (Valorant y otros)
 
 Pon el juego en **pantalla completa en ventana** (sin bordes). En pantalla completa exclusiva ningún overlay puede aparecer encima.

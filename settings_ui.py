@@ -1,15 +1,20 @@
 """Janela de configurações do LLyrics (as mudanças aparecem no overlay na hora)."""
+import html
 import threading
 
 from PySide6.QtCore import (Property, QEasingCurve, QObject, QPointF, QPropertyAnimation, QRectF, QSize, Qt, QTimer,
+                            QUrl,
                             Signal)
-from PySide6.QtGui import QColor, QFont, QGuiApplication, QLinearGradient, QPainter, QPen, QPixmap
+from PySide6.QtGui import (QColor, QDesktopServices, QFont, QGuiApplication, QLinearGradient, QPainter, QPen,
+                           QPixmap)
 from PySide6.QtWidgets import (QAbstractButton, QColorDialog, QComboBox, QFrame, QGridLayout, QHBoxLayout,
                                QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea,
                                QSizePolicy, QSlider, QStackedWidget, QVBoxLayout, QWidget)
 
+import community
 import hotkeys
 import i18n
+import lookcode
 import looks
 import render
 from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, EXITS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
@@ -65,6 +70,8 @@ QScrollBar:vertical {{ background: transparent; width: 8px; margin: 4px; }}
 QScrollBar::handle:vertical {{ background: #2E2E3B; border-radius: 4px; min-height: 30px; }}
 QScrollBar::add-line, QScrollBar::sub-line {{ height: 0; }}
 #card {{ background: {CARD}; border: 1px solid {LINE}; border-radius: 14px; }}
+#lookCard {{ background: #20202A; border: 1px solid {LINE}; border-radius: 12px; }}
+#lookCard QLabel {{ background: transparent; }}
 #cardTitle {{ font-size: 12px; font-weight: 700; color: {ACC}; letter-spacing: 1px; }}
 #rowLabel {{ font-size: 13px; }}
 #caption {{ font-size: 11px; color: {MUTED}; }}
@@ -186,6 +193,51 @@ class ColorButton(QPushButton):
         p.end()
 
 
+def _esc(text):
+    return html.escape(str(text))[:300]
+
+
+def style_preview(style, w, h):
+    """Desenha uma frase de exemplo com o estilo (para os cartões da galeria)."""
+    from config import DEFAULTS
+    import lyrics as lyr
+    cfg = dict(DEFAULTS)
+    cfg.update(style)
+    cfg.update(countdown=False, preview=False, previous_line=False, party=False, lyrics_opacity=1.0)
+    k = 30.0 / max(1.0, float(cfg["text_size"]))
+    cfg["text_size"] = 30
+    cfg["letter_spacing"] = float(cfg["letter_spacing"]) * k
+    cfg["line_spacing"] = float(cfg["line_spacing"]) * k
+    cfg["line_width"] = 4000  # uma linha só; depois a imagem é reduzida para caber
+    sample = tr("gallery.sample")
+    st = render.TextStyle(cfg)
+    text_w = st.fm.horizontalAdvance(st.prep(sample)) * (1.5 if cfg["layout"] != "lines" else 1.0)
+    cw = int(max(w * 1.25, text_w + 70))
+    ch = int(cw * h / w)
+    canvas = QPixmap(cw, ch)
+    canvas.fill(Qt.transparent)
+    cp = QPainter(canvas)
+    lines = lyr.parse_lrc(f"[00:00.00]{sample}\n[00:30.00]x")
+    wins = render.line_windows(lines, cfg)
+    render.draw_lyrics(cp, cw, ch, cfg, lines, wins, 9.0, None, now=9.0,
+                       stack_box=(cw * 0.6, ch * 0.9) if cfg["layout"] == "stack" else None)
+    cp.end()
+    pm = QPixmap(w, h)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    p.setRenderHint(QPainter.SmoothPixmapTransform)
+    g = QLinearGradient(0, 0, w, h)
+    g.setColorAt(0, QColor("#1D2350"))
+    g.setColorAt(1, QColor("#2B3A2A"))
+    p.setBrush(g)
+    p.setPen(Qt.NoPen)
+    p.drawRoundedRect(QRectF(0, 0, w, h), 10, 10)
+    p.drawPixmap(QRectF(0, 0, w, h), canvas, QRectF(canvas.rect()))
+    p.end()
+    return pm
+
+
 class HotkeyButton(QPushButton):
     """Clique e aperte as teclas do novo atalho."""
     captured = Signal(str)
@@ -248,6 +300,7 @@ class HotkeyButton(QPushButton):
 
 class _Bridge(QObject):
     done = Signal(bool, str, object)
+    gallery = Signal(object, str)
 
 
 def _icon_pixmap(size=40):
@@ -306,6 +359,7 @@ class SettingsWindow(QWidget):
         ctl.config_changed_externally = self.refresh
         self._bridge = _Bridge()
         self._bridge.done.connect(self._import_done)
+        self._bridge.gallery.connect(self._gallery_done)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
@@ -349,6 +403,7 @@ class SettingsWindow(QWidget):
 
         self._build_pages()
         self.nav.currentRowChanged.connect(self.stack.setCurrentIndex)
+        self.nav.currentRowChanged.connect(self._page_changed)
         self.nav.setCurrentRow(0)
 
         # rodapé
@@ -541,6 +596,65 @@ class SettingsWindow(QWidget):
         ])
         v.addStretch(1)
 
+        v = self._page("☆", tr("page.community"), tr("page.community.sub"))
+        cv = self._card(v, tr("card.share"))
+        cap = QLabel(tr("share.caption"))
+        cap.setObjectName("caption")
+        cap.setWordWrap(True)
+        cv.addWidget(cap)
+        self.share_name = QLineEdit()
+        self.share_name.setPlaceholderText(tr("share.name_ph"))
+        self.share_author = QLineEdit()
+        self.share_author.setPlaceholderText(tr("share.author_ph"))
+        self.share_author.setText(self.cfg.get("share_author", ""))
+        row = QHBoxLayout()
+        row.addWidget(self.share_name, 1)
+        row.addWidget(self.share_author, 1)
+        cv.addLayout(row)
+        self.share_desc = QLineEdit()
+        self.share_desc.setPlaceholderText(tr("share.desc_ph"))
+        cv.addWidget(self.share_desc)
+        row = QHBoxLayout()
+        self.share_msg = QLabel("")
+        self.share_msg.setObjectName("caption")
+        self.share_msg.setWordWrap(True)
+        row.addWidget(self.share_msg, 1)
+        copy_btn = QPushButton(tr("share.copy"))
+        copy_btn.setCursor(Qt.PointingHandCursor)
+        copy_btn.clicked.connect(self._copy_style_code)
+        pub_btn = QPushButton(tr("share.publish"))
+        pub_btn.setObjectName("primary")
+        pub_btn.setCursor(Qt.PointingHandCursor)
+        pub_btn.clicked.connect(self._publish_style)
+        row.addWidget(copy_btn)
+        row.addWidget(pub_btn)
+        cv.addLayout(row)
+
+        cv = self._card(v, tr("card.gallery"))
+        row = QHBoxLayout()
+        self.gallery_search = QLineEdit()
+        self.gallery_search.setPlaceholderText(tr("gallery.search"))
+        self.gallery_search.textChanged.connect(self._filter_gallery)
+        refresh = QPushButton(tr("gallery.refresh"))
+        refresh.setCursor(Qt.PointingHandCursor)
+        refresh.clicked.connect(lambda: self._load_gallery(force=True))
+        row.addWidget(self.gallery_search, 1)
+        row.addWidget(refresh)
+        cv.addLayout(row)
+        self.gallery_msg = QLabel(tr("gallery.loading"))
+        self.gallery_msg.setObjectName("caption")
+        self.gallery_msg.setWordWrap(True)
+        cv.addWidget(self.gallery_msg)
+        self.gallery_box = QVBoxLayout()
+        self.gallery_box.setSpacing(10)
+        cv.addLayout(self.gallery_box)
+        self.gallery_cards = []
+        note = QLabel(f"<span style='color:{MUTED}; font-size:11px;'>{tr('gallery.mod_note')}</span>")
+        note.setWordWrap(True)
+        cv.addWidget(note)
+        v.addStretch(1)
+        self._gallery_loaded = False
+
         v = self._page("▣", tr("page.widget"), tr("page.widget.sub"))
         self._card(v, tr("card.widget"), [
             ("widget_position", ("choice", C(WIDGET_POSITIONS))),
@@ -666,6 +780,124 @@ class SettingsWindow(QWidget):
             f"{c['hotkey_toggle']} &nbsp;{tr('side.toggle')}<br>{c['hotkey_move']} &nbsp;{tr('side.move')}<br>"
             f"{c['hotkey_settings']} &nbsp;{tr('side.settings')}</span>")
 
+    def _page_changed(self, row):
+        if self.nav.item(row) and tr("page.community") in self.nav.item(row).text() and not self._gallery_loaded:
+            self._gallery_loaded = True
+            self._load_gallery()
+
+    # ------------------------------------------------------------ comunidade
+    def _copy_style_code(self):
+        QGuiApplication.clipboard().setText(lookcode.encode(lookcode.style_of(self.cfg)))
+        self.share_msg.setText(tr("share.copied"))
+
+    def _publish_style(self):
+        name = self.share_name.text().strip()
+        if not name:
+            self.share_msg.setText(tr("share.need_name"))
+            self.share_name.setFocus()
+            return
+        author = self.share_author.text().strip()
+        self.cfg["share_author"] = author
+        self.cfg.save()
+        code = lookcode.encode(lookcode.style_of(self.cfg))
+        QDesktopServices.openUrl(QUrl(community.submit_url(name, author, self.share_desc.text().strip(), code)))
+        self.share_msg.setText(tr("share.opened"))
+
+    def _load_gallery(self, force=False):
+        self.gallery_msg.setText(tr("gallery.loading"))
+        self.gallery_msg.setVisible(True)
+
+        def work():
+            try:
+                self._bridge.gallery.emit(community.fetch_gallery(force), "")
+            except OSError as e:
+                self._bridge.gallery.emit(None, str(e))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _gallery_done(self, looks, err):
+        for card in self.gallery_cards:
+            card.setParent(None)
+            card.deleteLater()
+        self.gallery_cards = []
+        if looks is None:
+            self.gallery_msg.setText(tr("gallery.error", e=err))
+            return
+        if not looks:
+            self.gallery_msg.setText(tr("gallery.empty"))
+            return
+        self.gallery_msg.setVisible(False)
+        for look in looks:
+            try:
+                style = lookcode.decode(look["code"])
+            except ValueError:
+                continue
+            card = self._gallery_card(look, style)
+            self.gallery_box.addWidget(card)
+            self.gallery_cards.append(card)
+        self._filter_gallery(self.gallery_search.text())
+
+    def _gallery_card(self, look, style):
+        card = QFrame()
+        card.setObjectName("lookCard")
+        card.search_text = " ".join(str(look.get(k, "")) for k in ("name", "author", "description")).lower()
+        h = QHBoxLayout(card)
+        h.setContentsMargins(10, 10, 12, 10)
+        h.setSpacing(14)
+        pic = QLabel()
+        pic.setPixmap(style_preview(style, 260, 84))
+        h.addWidget(pic)
+        info = QVBoxLayout()
+        info.setSpacing(2)
+        title = QLabel(f"<b>{_esc(look.get('name', '?'))}</b>")
+        info.addWidget(title)
+        if look.get("author"):
+            by = QLabel(tr("gallery.by", author=str(look["author"])[:40]))
+            by.setTextFormat(Qt.PlainText)
+            by.setObjectName("caption")
+            info.addWidget(by)
+        if look.get("description"):
+            d = QLabel(str(look["description"])[:200])
+            d.setTextFormat(Qt.PlainText)
+            d.setObjectName("caption")
+            d.setWordWrap(True)
+            info.addWidget(d)
+        info.addStretch(1)
+        btns = QHBoxLayout()
+        apply_btn = QPushButton(tr("gallery.apply"))
+        apply_btn.setObjectName("primary")
+        apply_btn.setCursor(Qt.PointingHandCursor)
+        apply_btn.clicked.connect(lambda _=False, s=style, n=look.get("name", ""): self._apply_style(s, n))
+        copy_btn = QPushButton(tr("share.copy"))
+        copy_btn.setCursor(Qt.PointingHandCursor)
+        copy_btn.clicked.connect(lambda _=False, c=look["code"]: QGuiApplication.clipboard().setText(c))
+        btns.addWidget(apply_btn)
+        btns.addWidget(copy_btn)
+        btns.addStretch(1)
+        info.addLayout(btns)
+        h.addLayout(info, 1)
+        return card
+
+    def _filter_gallery(self, text):
+        q = (text or "").strip().lower()
+        shown = 0
+        for card in self.gallery_cards:
+            ok = not q or q in card.search_text
+            card.setVisible(ok)
+            shown += ok
+        if self.gallery_cards:
+            self.gallery_msg.setText(tr("gallery.none_found"))
+            self.gallery_msg.setVisible(shown == 0)
+
+    def _apply_style(self, style, name):
+        self.cfg.update(_RESET_EXTRAS)
+        self.cfg.update(style)
+        self.refresh()
+        self.ctl.apply_config()
+        self.cfg.save()
+        self.gallery_msg.setText(tr("gallery.applied", name=name))
+        self.gallery_msg.setVisible(True)
+
     # Linhas que só fazem sentido com outra opção ligada
     def _update_visibility(self):
         c = self.cfg
@@ -751,6 +983,19 @@ class SettingsWindow(QWidget):
 
     def _import_code(self):
         code = self.code_edit.text()
+        if lookcode.find_code(code):
+            try:
+                style = lookcode.decode(code)
+            except ValueError:
+                self._msg(tr("import.bad_llyrics"))
+                return
+            self.cfg.update(_RESET_EXTRAS)
+            self.cfg.update(style)
+            self.refresh()
+            self.ctl.apply_config()
+            self.cfg.save()
+            self._msg(tr("import.llyrics_applied"))
+            return
         self.code_btn.setEnabled(False)
         self._msg(tr("import.searching"))
 

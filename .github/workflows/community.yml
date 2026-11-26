@@ -1,0 +1,55 @@
+# Galeria da comunidade: valida estilos enviados por issue e publica quando o dono adiciona o rótulo "approved".
+name: Community styles
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  style:
+    if: startsWith(github.event.issue.title, '[Look]')
+    runs-on: ubuntu-latest
+    concurrency: community-gallery
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create look --color C4B3FF --description "Community style" --force || true
+          gh label create approved --color 2EA043 --description "Approved style: publish to the gallery" --force || true
+          gh issue edit ${{ github.event.issue.number }} --add-label look || true
+
+      - name: Check the style
+        if: github.event.action != 'labeled'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python community/publish.py check > result.md
+          gh issue comment ${{ github.event.issue.number }} --body-file result.md
+
+      - name: Publish the style
+        if: github.event.action == 'labeled' && github.event.label.name == 'approved'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          python community/publish.py publish > result.md
+          git config user.name "LLyrics community bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add community/looks.json
+          git commit -m "Community style from #${{ github.event.issue.number }}" || exit 0
+          git push
+          gh issue comment ${{ github.event.issue.number }} --body-file result.md
+          gh issue close ${{ github.event.issue.number }}

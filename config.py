@@ -145,6 +145,7 @@ DEFAULTS = {
     "auto_update": True,
     "autostart": False,
     "skip_version": "",
+    "share_author": "",
 }
 
 

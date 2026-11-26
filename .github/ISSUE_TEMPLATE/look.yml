@@ -1,0 +1,37 @@
+name: "🎨 Share a style / Compartir estilo / Compartilhar estilo"
+description: "Publish your LLyrics style in the community gallery."
+title: "[Look] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **EN** · Easiest way: in LLyrics open *Settings → Community → Publish to community* and this form is filled in for you. Your style shows up in the gallery after it's approved.
+        **ES** · Lo más fácil: en LLyrics abre *Ajustes → Comunidad → Publicar en la comunidad* y este formulario se llena solo. Tu estilo aparece en la galería cuando es aprobado.
+        **PT** · O jeito mais fácil: no LLyrics abra *Configurações → Comunidade → Publicar na comunidade* e este formulário já vem preenchido. Seu estilo aparece na galeria depois de aprovado.
+  - type: input
+    id: name
+    attributes:
+      label: "Style name / Nombre / Nome"
+      placeholder: "Neon nights"
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: "Your name or nickname / Tu nombre o apodo / Seu nome ou apelido"
+    validations:
+      required: false
+  - type: input
+    id: description
+    attributes:
+      label: "Short description / Descripción corta / Descrição curta"
+    validations:
+      required: false
+  - type: textarea
+    id: code
+    attributes:
+      label: "Style code / Código del estilo / Código do estilo"
+      description: "LLY1-… (Settings → Community → Copy code)"
+      render: text
+    validations:
+      required: true

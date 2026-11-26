@@ -4,6 +4,23 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.3.0
+
+### English
+- New **Community** page: share your style as a code or publish it to the community gallery
+- Browse the gallery with previews and apply any style with one click
+- The import box now also accepts LLyrics codes (`LLY1-…`)
+
+### Español
+- Nueva página **Comunidad**: comparte tu estilo como código o publícalo en la galería de la comunidad
+- Explora la galería con vistas previas y aplica cualquier estilo con un clic
+- El campo de importar ahora también acepta códigos de LLyrics (`LLY1-…`)
+
+### Português
+- Nova página **Comunidade**: compartilhe seu estilo como código ou publique na galeria da comunidade
+- Veja a galeria com prévias e aplique qualquer estilo com um clique
+- O campo de importar agora também aceita códigos do LLyrics (`LLY1-…`)
+
 ## 1.2.0
 
 ### English

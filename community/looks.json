@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "looks": [
+    {
+      "id": "neon",
+      "name": "Neon karaoke",
+      "author": "LLyrics",
+      "description": "Bebas Neue, typewriter, karaoke and glow in the album's colour.",
+      "code": "LLY1-eNpVUkFugzAQ_It7jaq0SqoktyYt37CMWcDCeJG9LqFV_941MYJym_HszHjNj1BagyNxEcqWsRc7oZzpFRl0zNE0wOgNgeeDUumu8RhdJS61sgGYQrsCjRajlz1WwKMBralEYqOjCke2Ix-TLAbCXj7ULHwqiuPt9M7SyuMgQ6tYvYjhbkhuG6lIyNIa584llCowbOw6Yiqb8h06EA8kwwDAPV-e9wtBHlxDbeY65RV2sDhYNWFM9tY4SPYWiFfANkob16Sh424-XKlDJkZTJdvznm3t5I0OEpOGppzFzkm4ZGW4Wcd-_sR6RK3RHRcJ2WFQPrnlrc9IQl2DppBWgpzPtIcvA-MqSxhjkNvwABpdtcn-uJ6vnymb7-W7tMc8nrFUfXrOXITgTjKYb5Yd3hi2xm_NTsXtXLyy2foX_XuJLT05vZSKwwBeq5Bb_v4BnxDmKw",
+      "added": "2026-11-25T00:00:02Z"
+    },
+    {
+      "id": "minimal",
+      "name": "Minimal",
+      "author": "LLyrics",
+      "description": "Clean Poppins on a soft background, fades in and out.",
+      "code": "LLY1-eNpNkc1OwzAQhN_FXBEKqKA2N1rIa1jG2aRWHK9lr2kD4t1Z5z-n7OTzzGT9K5TW4EiUQgdQvXgUyplekUHHWqNqYOlL6a4NmFwtSgoJWEG7vmu0mILskdlSRLSmFllNjmq8uRVLkbCXE83gQ1W9Xo7vjNYBvYxXxfQCw92Q3DdRiZDRBseuHr03LrLQ2nyoUTbyKVPbXMGhy63zJKMH4KbPT8UiUADX0nXWOhUUdrBaWDVgyhHWOMgBFoggsI_SxrWiLPKp_HGTDrNwM3X2PRWZGILRUWJmaJjD2DmDa9g873ZSjI_YPtHV6I6bxNnCq5DtZoNxktA0oIkJvhYuwHKAbwPbXsYZU5RT-rTiCBpdvcv-OJ_Onzmbfyx0dqs5z1L1-U7nIgR3ktH8MHZ44_Fqwt7sWF1O1Qub0eDhFsy0w-0u9vLg9FIqeQ9Bq7iE__0DffHk7w",
+      "added": "2026-11-25T00:00:03Z"
+    },
+    {
+      "id": "retro",
+      "name": "Retro pixel",
+      "author": "LLyrics",
+      "description": "Pixel font, rainbow colours and a wave entrance.",
+      "code": "LLY1-eNpNUctuwyAQ_Bd6jar0JSW5tWnzG4jAJkHGrAVLHLfqv3fXwbW5zTA7Myw_ylgLkdROJePjEXu1Uib61pDHyGxvrsDU0djmnLBEp3YnEzIwhWEGFgOWpFt0wEMZg3dK2BLJYc9GlIrISiZs9V3NwofD4W2_eWepS9jpfDGsnsRw86SXXUwhZOkJx75dgpx1JpOIyXOQwdrGuyA1IkbpLkjnDoDrPj2uJ4ISxDNdKteYZLCBKTuYAYukBB8hs0kAIkhsY6yPZ7Vby5BcztRrJXrvxHa7FsWQvM0aRUNDzWJnEU5ZFS62sh6Pmq_o4m3DRXJ16PjRw_9zR6ThdAJLrOCf4fyVLOjqYd7KiLFkvQzPYDG6Rfbnx_bjS7L5XamRPdbxirVp5VdrEYIb6ey_WfYi8OLT0mxz2G8Pz2xGQwd98vcVzj-xpIdop1Kl6yBZk2vL3z94N-db",
+      "added": "2026-11-25T00:00:04Z"
+    },
+    {
+      "id": "elegant",
+      "name": "Elegant",
+      "author": "LLyrics",
+      "description": "Playfair Display in honey, rising in with a soft glow.",
+      "code": "LLY1-eNpNUctuwyAQ_Bd6jSK3SqoktzatfwNRWMfImLVgqeNW_fcufsT2yTMMM7PLr1BagydxETV6GMROKG9bRRY9c8FGYOpL6eYWMHkjLpVyEZhCx4BC4n-NDlOQLRrgOxGdNSKzyZPB3j9kKRK2clKz8Kksj9fTG0tNwE7GWrF6EcPdktxWUYmQpRWOZTunhkrZwMzNrbescbmC51HEhGTsALjp875YCArgb1TPXKOCwgYeg7ExphzhrIfILg6IILCP0tbfxKXYH3fj4UodZqK3JvueC_Z1Q7A6SswaGuYwds7CR9iMNzspxk-sR1Rb3XCTOFt0KmS72WBEEqoKNLGCn4ULMB3g20K_yjLGFOWUPi0rgkZvNtkf7-f3z5zNg4XGrTVnLFWb33QuQnAnGe0Pyw6vDGsbtman8nouX9iMhg76YKcdrm-xpQevl1Kp6yBoFZfwv3_xVuWB",
+      "added": "2026-11-25T00:00:05Z"
+    },
+    {
+      "id": "fun",
+      "name": "Playful",
+      "author": "LLyrics",
+      "description": "Pacifico in orchid with a bouncy pop.",
+      "code": "LLY1-eNpNUdFOhDAQ_Jf6agya09zdm57yG01tF2go3aZdvEPjv7uFIvA209mZYfdHKK3BkzgLjLqzRtwL5e2gyKJnMmBg5lPpvo04eiPOjXIJmEK3AY0OxygHNMAzCd3so3mADF7Zh-KYZWMiHOSiZuFdXT9fjq8sNRGDTJ1i9b8p3CzJfRc1ErK2wbluUNo2VmemdXlsybDG5Q4ePYgFyRQAuOvjQ7USFMG31BWuV1FhD6uDUxOOOcFZD4lNHBBBZBtO9K04V3koP27UoRBXa7LtqcqKKVqdJGYNTSWLnbNwzSpwt5Jq_sT2RJ3VPRdJxSGomN3KkmYkoWlAEyv4LJzPdIQvC9suZ4xjkvvwBBq92WW_v53ePnI2_1fs8x7LeMFSDfmkpQjBjWSy3yw7vDDsbNybHevLqX5iM5oCXKNdVrhdYk9PXq-lxhAgapXW8N8_gu_lVA",
+      "added": "2026-11-25T00:00:06Z"
+    }
+  ]
+}

@@ -58,6 +58,16 @@ Atalhos padrão. Dá para trocar em **Configurações → Atalhos**.
 | Ctrl+Shift+K | Mover as janelas |
 | Ctrl+Shift+O | Configurações |
 
+## Comunidade
+
+Compartilhe seus estilos e teste os que outros jogadores fizeram, em **Configurações → Comunidade**:
+
+- **Copiar código**: transforma o seu visual atual num código (`LLY1-…`) que você pode mandar para qualquer pessoa. Ela cola em *Estilo → Looks da comunidade → Importar*.
+- **Publicar na comunidade**: abre um formulário do GitHub já preenchido. Depois de aprovado, o estilo aparece na galeria de todo mundo.
+- **Galeria da comunidade**: veja, confira a prévia e aplique estilos com um clique.
+
+Os looks do site do mod ([lyrics.remake.lol](https://lyrics.remake.lol/)) também podem ser importados (códigos `STL-…`), mas publicar lá só é possível de dentro do Minecraft, com o mod.
+
 ## Em jogos (Valorant e outros)
 
 Coloque o jogo em **janela em tela cheia** (borderless). No modo tela cheia exclusiva, nenhum overlay aparece por cima.
@@ -85,6 +95,8 @@ Todos os textos do app ficam em `i18n.py`. Para acrescentar um idioma, copie a c
 | `overlay.py` | Janelas do overlay e posição |
 | `settings_ui.py` | Janela de configurações |
 | `looks.py` | Importa looks do site do mod |
+| `community.py` | Galeria da comunidade e compartilhamento |
+| `lookcode.py` | Códigos de estilo (`LLY1-…`) |
 | `config.py` | Opções e valores padrão |
 | `updater.py` | Procura versão nova e atualiza o app |
 | `i18n.py` | Traduções (English, Español, Português) |
