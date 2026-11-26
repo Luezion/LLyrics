@@ -8,14 +8,16 @@ from PySide6.QtCore import (Property, QEasingCurve, QObject, QPointF, QPropertyA
 from PySide6.QtGui import (QColor, QDesktopServices, QFont, QGuiApplication, QLinearGradient, QPainter, QPen,
                            QPixmap)
 from PySide6.QtWidgets import (QAbstractButton, QColorDialog, QComboBox, QFrame, QGridLayout, QHBoxLayout,
-                               QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea,
-                               QSizePolicy, QSlider, QStackedWidget, QVBoxLayout, QWidget)
+                               QInputDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu, QMessageBox,
+                               QPushButton, QScrollArea, QSizePolicy, QSlider, QStackedWidget, QToolButton,
+                               QVBoxLayout, QWidget)
 
 import community
 import hotkeys
 import i18n
 import lookcode
 import looks
+import mystyles
 import render
 from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, COVER_STYLES, EXITS, WIDGET_LAYOUTS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
                     PARTY_EFFECTS, POSITION_MODES, WIDGET_POSITIONS)
@@ -614,6 +616,36 @@ class SettingsWindow(QWidget):
         ])
         v.addStretch(1)
 
+        v = self._page("❖", tr("page.mystyles"), tr("page.mystyles.sub"))
+        cv = self._card(v, tr("card.save_current"))
+        row = QHBoxLayout()
+        self.mystyle_name = QLineEdit()
+        self.mystyle_name.setPlaceholderText(tr("mystyles.name_ph"))
+        self.mystyle_name.returnPressed.connect(self._save_mystyle)
+        save_btn = QPushButton(tr("btn.save"))
+        save_btn.setObjectName("primary")
+        save_btn.setCursor(Qt.PointingHandCursor)
+        save_btn.clicked.connect(self._save_mystyle)
+        row.addWidget(self.mystyle_name, 1)
+        row.addWidget(save_btn)
+        cv.addLayout(row)
+        self.mystyle_msg = QLabel(tr("mystyles.caption"))
+        self.mystyle_msg.setObjectName("caption")
+        self.mystyle_msg.setWordWrap(True)
+        cv.addWidget(self.mystyle_msg)
+
+        cv = self._card(v, tr("card.saved"))
+        self.mystyle_empty = QLabel(tr("mystyles.empty"))
+        self.mystyle_empty.setObjectName("caption")
+        self.mystyle_empty.setWordWrap(True)
+        cv.addWidget(self.mystyle_empty)
+        self.mystyle_box = QVBoxLayout()
+        self.mystyle_box.setSpacing(10)
+        cv.addLayout(self.mystyle_box)
+        self.mystyle_cards = []
+        v.addStretch(1)
+        self._refresh_mystyles()
+
         v = self._page("☆", tr("page.community"), tr("page.community.sub"))
         cv = self._card(v, tr("card.share"))
         cap = QLabel(tr("share.caption"))
@@ -820,6 +852,119 @@ class SettingsWindow(QWidget):
         else:
             self.autostyle_msg.setText(tr("autostyle.auto_done", summary=i18n.style_summary(summary)))
 
+    # ------------------------------------------------------------ meus estilos
+    def _save_mystyle(self, name=None, style=None):
+        name = (name or self.mystyle_name.text()).strip()
+        if not name:
+            self.mystyle_msg.setText(tr("mystyles.need_name"))
+            self.mystyle_name.setFocus()
+            return
+        replaced = mystyles.save(name, style or lookcode.style_of(self.ctl.view))
+        self.mystyle_msg.setText(tr("mystyles.replaced" if replaced else "mystyles.saved", name=name))
+        self.mystyle_name.clear()
+        self._refresh_mystyles()
+
+    def _refresh_mystyles(self):
+        for card in self.mystyle_cards:
+            card.setParent(None)
+            card.deleteLater()
+        self.mystyle_cards = []
+        items = mystyles.load()
+        self.mystyle_empty.setVisible(not items)
+        for it in items:
+            card = self._mystyle_card(it)
+            self.mystyle_box.addWidget(card)
+            self.mystyle_cards.append(card)
+        if getattr(self.ctl, "mystyles_changed", None):
+            self.ctl.mystyles_changed()
+
+    def _mystyle_card(self, it):
+        card = QFrame()
+        card.setObjectName("lookCard")
+        h = QHBoxLayout(card)
+        h.setContentsMargins(10, 10, 12, 10)
+        h.setSpacing(14)
+        pic = QLabel()
+        pic.setPixmap(style_preview(it["style"], 260, 84))
+        h.addWidget(pic)
+        info = QVBoxLayout()
+        info.setSpacing(4)
+        title = QLabel(it["name"])
+        title.setTextFormat(Qt.PlainText)
+        title.setStyleSheet("font-weight: 700;")
+        info.addWidget(title)
+        when = QLabel((it.get("updated") or it.get("created") or "")[:16].replace("T", "  "))
+        when.setObjectName("caption")
+        info.addWidget(when)
+        info.addStretch(1)
+        btns = QHBoxLayout()
+        apply_btn = QPushButton(tr("gallery.apply"))
+        apply_btn.setObjectName("primary")
+        apply_btn.setCursor(Qt.PointingHandCursor)
+        apply_btn.clicked.connect(lambda _=False, i=it: self._apply_mystyle(i))
+        more = QToolButton()
+        more.setText("•••")
+        more.setCursor(Qt.PointingHandCursor)
+        more.setPopupMode(QToolButton.InstantPopup)
+        more.setStyleSheet(f"QToolButton {{ background:#22222D; border:1px solid #32323F; border-radius:9px;"
+                           f" padding:6px 12px; }} QToolButton::menu-indicator {{ image:none; }}"
+                           f" QToolButton:hover {{ border-color:{ACC}; }}")
+        menu = QMenu(more)
+        menu.setStyleSheet(f"QMenu {{ background:#1E1E28; border:1px solid {LINE}; padding:4px; }}"
+                           f" QMenu::item {{ padding:6px 18px; border-radius:6px; }}"
+                           f" QMenu::item:selected {{ background:#34294A; }}")
+        menu.addAction(tr("mystyles.update"), lambda i=it: self._update_mystyle(i))
+        menu.addAction(tr("mystyles.rename"), lambda i=it: self._rename_mystyle(i))
+        menu.addAction(tr("share.copy"),
+                       lambda i=it: QGuiApplication.clipboard().setText(lookcode.encode(i["style"])))
+        menu.addAction(tr("mystyles.publish"), lambda i=it: self._publish_mystyle(i))
+        menu.addSeparator()
+        menu.addAction(tr("mystyles.delete"), lambda i=it: self._delete_mystyle(i))
+        more.setMenu(menu)
+        btns.addWidget(apply_btn)
+        btns.addWidget(more)
+        btns.addStretch(1)
+        info.addLayout(btns)
+        h.addLayout(info, 1)
+        return card
+
+    def _apply_mystyle(self, it):
+        self.cfg.update(_RESET_EXTRAS)
+        self.cfg.update(it["style"])
+        if self.cfg.get("auto_style"):
+            self.cfg["auto_style"] = False
+            self.ctl.style_override = {}
+        self.refresh()
+        self.ctl.apply_config()
+        self.cfg.save()
+        self.mystyle_msg.setText(tr("mystyles.applied", name=it["name"]))
+
+    def _update_mystyle(self, it):
+        mystyles.update(it["id"], lookcode.style_of(self.ctl.view))
+        self.mystyle_msg.setText(tr("mystyles.replaced", name=it["name"]))
+        self._refresh_mystyles()
+
+    def _rename_mystyle(self, it):
+        name, ok = QInputDialog.getText(self, tr("mystyles.rename"), tr("mystyles.rename_q"), text=it["name"])
+        if ok and name.strip():
+            mystyles.rename(it["id"], name)
+            self._refresh_mystyles()
+
+    def _delete_mystyle(self, it):
+        box = QMessageBox(self)
+        box.setWindowTitle("LLyrics")
+        box.setText(tr("mystyles.delete_q", name=it["name"]))
+        box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        box.setDefaultButton(QMessageBox.No)
+        if box.exec() == QMessageBox.Yes:
+            mystyles.delete(it["id"])
+            self._refresh_mystyles()
+
+    def _publish_mystyle(self, it):
+        url = community.submit_url(it["name"], self.cfg.get("share_author", ""), "", lookcode.encode(it["style"]))
+        QDesktopServices.openUrl(QUrl(url))
+        self.mystyle_msg.setText(tr("share.opened"))
+
     # ------------------------------------------------------------ comunidade
     def _copy_style_code(self):
         QGuiApplication.clipboard().setText(lookcode.encode(lookcode.style_of(self.ctl.view)))
@@ -906,7 +1051,13 @@ class SettingsWindow(QWidget):
         copy_btn = QPushButton(tr("share.copy"))
         copy_btn.setCursor(Qt.PointingHandCursor)
         copy_btn.clicked.connect(lambda _=False, c=look["code"]: QGuiApplication.clipboard().setText(c))
+        save_btn = QPushButton(tr("btn.save"))
+        save_btn.setCursor(Qt.PointingHandCursor)
+        save_btn.clicked.connect(lambda _=False, s_=style, n=look.get("name", ""): (
+            self._save_mystyle(n, s_), self.gallery_msg.setText(tr("mystyles.saved", name=n)),
+            self.gallery_msg.setVisible(True)))
         btns.addWidget(apply_btn)
+        btns.addWidget(save_btn)
         btns.addWidget(copy_btn)
         btns.addStretch(1)
         info.addLayout(btns)

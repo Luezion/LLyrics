@@ -23,6 +23,7 @@ Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra d
 - Cor da capa do álbum, paletas prontas, arco-íris, cor própria, **degradê de 2 ou 3 cores**, arco-íris correndo
 - Movimento parado (tremer, onda, pulinho, pulsar, flutuar, balançar), brilhinhos e modo festa
 - Contorno, sombra, brilho e fundo; 12 fontes livres (Google Fonts)
+- **Meus estilos**: salve seus visuais no PC e troque entre eles com um clique (também pelo menu da bandeja)
 - **Estilo para esta música**: um visual gerado a partir do ritmo, da letra, do gênero do artista ([MusicBrainz](https://musicbrainz.org)) e das cores da capa, uma vez ou a cada música
 - Estilos prontos, incluindo "Shake" e "Void Echoes", e importação de looks do site da comunidade do mod pelo código `STL-XXXXXX`
 
@@ -97,6 +98,7 @@ Todos os textos do app ficam em `i18n.py`. Para acrescentar um idioma, copie a c
 | `settings_ui.py` | Janela de configurações |
 | `looks.py` | Importa looks do site do mod |
 | `autostyle.py` | Gera um estilo para a música que está tocando |
+| `mystyles.py` | Estilos salvos no PC |
 | `community.py` | Galeria da comunidade e compartilhamento |
 | `lookcode.py` | Códigos de estilo (`LLY1-…`) |
 | `config.py` | Opções e valores padrão |

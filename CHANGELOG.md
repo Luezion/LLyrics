@@ -4,6 +4,26 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.7.0
+
+### English
+- New **My styles** page: save your looks on your PC with a name and switch between them with one click, no codes needed
+- Replace, rename, copy the code, publish or delete each saved style
+- Save styles straight from the community gallery
+- Your saved styles are also in the ♪ tray menu, to switch without leaving the game
+
+### Español
+- Nueva página **Mis estilos**: guarda tus looks en tu PC con un nombre y cambia entre ellos con un clic, sin códigos
+- Reemplaza, renombra, copia el código, publica o elimina cada estilo guardado
+- Guarda estilos directo desde la galería de la comunidad
+- Tus estilos guardados también están en el menú ♪ de la bandeja, para cambiar sin salir del juego
+
+### Português
+- Nova página **Meus estilos**: salve seus visuais no PC com um nome e troque entre eles com um clique, sem precisar de código
+- Substitua, renomeie, copie o código, publique ou exclua cada estilo salvo
+- Salve estilos direto da galeria da comunidade
+- Seus estilos salvos também ficam no menu ♪ da bandeja, para trocar sem sair do jogo
+
 ## 1.6.0
 
 ### English

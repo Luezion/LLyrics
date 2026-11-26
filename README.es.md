@@ -35,6 +35,7 @@ Cuando sale una versión nueva, la app muestra una ventana para actualizar con u
 - Color de la portada, paletas, arcoíris, color propio, **degradado de 2 o 3 colores**, arcoíris en movimiento
 - Movimiento en reposo (temblar, onda, saltito, latir, flotar, balancear), destellos y modo fiesta
 - Contorno, sombra, brillo y fondo; 12 fuentes libres (Google Fonts)
+- **Mis estilos**: guarda tus looks en tu PC y cambia entre ellos con un clic (también desde el menú de la bandeja)
 - **Estilo para esta canción**: un look generado a partir del ritmo, la letra, el género del artista ([MusicBrainz](https://musicbrainz.org)) y los colores de la portada, una vez o en cada canción
 - Estilos listos, incluidos "Shake" y "Void Echoes", e importación de looks del sitio de la comunidad del mod con un código `STL-XXXXXX`
 

@@ -99,8 +99,34 @@ def main():
     act_autostyle = QAction()
     act_autostyle.triggered.connect(lambda: ctl.generate_style(permanent=True))
     act_quit = QAction()
-    for a in (act_toggle, act_move, act_settings, act_autostyle, act_update):
+    for a in (act_toggle, act_move, act_settings, act_autostyle):
         menu.addAction(a)
+    styles_menu = menu.addMenu("")
+    menu.addAction(act_update)
+
+    def rebuild_styles_menu():
+        import mystyles
+        styles_menu.setTitle(tr("tray.mystyles"))
+        styles_menu.clear()
+        items = mystyles.load()
+        if not items:
+            a = styles_menu.addAction(tr("tray.mystyles_empty"))
+            a.setEnabled(False)
+        for it in items:
+            styles_menu.addAction(it["name"], lambda i=it: apply_saved(i))
+
+    def apply_saved(it):
+        from settings_ui import _RESET_EXTRAS
+        cfg.update(_RESET_EXTRAS)
+        cfg.update(it["style"])
+        cfg["auto_style"] = False
+        ctl.style_override = {}
+        cfg.save()
+        ctl.config_changed_externally()
+        ctl.apply_config()
+        notify(tr("mystyles.applied", name=it["name"]), 2500)
+
+    ctl.mystyles_changed = rebuild_styles_menu
     menu.addSeparator()
     menu.addAction(act_quit)
     tray.setContextMenu(menu)
@@ -113,6 +139,7 @@ def main():
         act_settings.setText(f"{tr('tray.settings')}  ({cfg['hotkey_settings']})")
         act_update.setText(tr("tray.update"))
         act_autostyle.setText(tr("tray.autostyle"))
+        rebuild_styles_menu()
         act_quit.setText(tr("tray.quit"))
 
     update_texts()
