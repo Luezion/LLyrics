@@ -4,6 +4,20 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.8.0
+
+### English
+- 7 new lyric layouts: **Arc** (curved like a rainbow), **Snake** (letters riding a wave), **Spotlight** (one big word at a time, like video captions), **Scatter** (words all over, tilted), **Poster** (every line stretched to the same width), **Punchline** (last word huge) and **Tilted**
+- "Style for this song" now has 21 looks, using the new layouts
+
+### Español
+- 7 diseños nuevos para la letra: **Arco**, **Serpiente** (letras sobre una onda), **Foco** (una palabra grande a la vez, como subtítulos de video), **Dispersas**, **Póster** (cada línea estirada al mismo ancho), **Remate** (última palabra gigante) e **Inclinada**
+- "Estilo para esta canción" ahora tiene 21 looks, usando los diseños nuevos
+
+### Português
+- 7 layouts novos para a letra: **Arco** (curvado como um arco-íris), **Serpente** (letras em cima de uma onda), **Holofote** (uma palavra grande por vez, como legenda de vídeo), **Espalhado**, **Pôster** (cada linha esticada até a mesma largura), **Punchline** (última palavra gigante) e **Inclinada**
+- O "Estilo para esta música" agora tem 21 visuais, usando os layouts novos
+
 ## 1.7.1
 
 ### English

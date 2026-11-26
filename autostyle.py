@@ -271,6 +271,38 @@ RECIPES = [
              font="comic_relief", layout="stack", animation="pop", idle="bounce", idle_strength=0.4,
              idle_speed=0.9, outline=True, outline_thickness=1.5, uppercase=True, sparkle=True,
              text_size=40, letter_spacing=0.5)),
+    dict(name="rainbow_arc", fam="pop latin brazil electronic", mood="love party faith", energy="mid",
+         colour="vivid3", dark=None, style=dict(
+             font="righteous", layout="arc", animation="typewriter", idle="float", idle_strength=0.3,
+             idle_speed=0.6, glow=True, uppercase=True, sparkle=True, text_size=44, letter_spacing=1)),
+    dict(name="captions", fam="rap pop latin electronic brazil", mood="party heavy", energy="high mid",
+         colour="vivid", dark=None, style=dict(
+             font="bebas", layout="spotlight", animation="pop", idle="shake", idle_strength=0.3, idle_speed=0.4,
+             outline=True, outline_thickness=1.6, uppercase=True, text_size=50, letter_spacing=1.5)),
+    dict(name="zine", fam="pop latin brazil rock", mood="party love", energy="high mid", colour="vivid3",
+         dark=None, style=dict(
+             font="comic_relief", layout="scatter", animation="pop", idle="bounce", idle_strength=0.3,
+             idle_speed=0.8, outline=True, outline_thickness=1.4, uppercase=True, sparkle=True, party=True,
+             text_size=40)),
+    dict(name="billboard", fam="rock rap electronic", mood="heavy party sad", energy="mid high", colour="hot",
+         dark=None, style=dict(
+             font="bebas", layout="poster", animation="drop", exit_animation="fade", idle="shake",
+             idle_strength=0.35, idle_speed=0.3, outline=True, outline_thickness=1.3, uppercase=True,
+             text_size=46, letter_spacing=1)),
+    dict(name="mic_drop", fam="rap rock latin", mood="heavy party", energy="mid high", colour="neon",
+         dark=True, style=dict(
+             font="montserrat", layout="punchline", animation="pop", idle="pulse", idle_strength=0.3,
+             idle_speed=0.5, outline=True, glow=True, uppercase=True, text_size=40, letter_spacing=1)),
+    dict(name="wave_ride", fam="latin brazil pop rnb", mood="love party", energy="mid low", colour="love",
+         dark=None, style=dict(
+             font="pacifico", layout="snake", animation="typewriter", exit_animation="drift", idle="float",
+             idle_strength=0.3, idle_speed=0.6, glow=True, sparkle=True, bold=False, text_size=44,
+             letter_spacing=0)),
+    dict(name="sticker", fam="pop latin brazil rap", mood="party love", energy="high mid", colour="vivid3",
+         dark=None, style=dict(
+             font="righteous", layout="tilted", animation="typewriter", idle="bounce", idle_strength=0.3,
+             idle_speed=0.7, outline=True, outline_thickness=1.6, uppercase=True, sparkle=True, text_size=48,
+             letter_spacing=1)),
     dict(name="chrome", fam="rock electronic rap", mood="heavy sad", energy="mid low", colour="ice",
          dark=True, style=dict(
              font="montserrat", layout="words", animation="drop", exit_animation="drift", idle="float",

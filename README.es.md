@@ -30,7 +30,7 @@ Cuando sale una versión nueva, la app muestra una ventana para actualizar con u
 
 - Entradas: máquina de escribir (al ritmo del canto), caída, subida, palabras, desvanecer, pop, onda
 - Salidas: igual que la entrada, desvanecer, llevada por el viento
-- Diseños: líneas, **pila** (palabras importantes grandes, pequeñas más chicas), primera palabra destacada (con o sin inclinación)
+- 11 diseños: líneas, **pila**, primera palabra destacada (con o sin inclinación), **arco**, **serpiente**, **foco** (una palabra grande a la vez), **dispersas**, **póster**, **remate** e **inclinada**
 - Karaoke, cuenta regresiva instrumental, línea anterior y vista previa de la siguiente
 - Color de la portada, paletas, arcoíris, color propio, **degradado de 2 o 3 colores**, arcoíris en movimiento
 - Movimiento en reposo (temblar, onda, saltito, latir, flotar, balancear), destellos y modo fiesta

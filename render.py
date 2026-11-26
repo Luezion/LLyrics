@@ -727,9 +727,318 @@ def content_size(cfg, text, index):
         bw = 2 * max(abs(v) for v in xs)
         bh = 2 * max(abs(v) for v in ys)
         return bw + pad * 2, bh + pad * 2
-    rows = line_rows(st, text, cfg.get("layout"))
+    lay = cfg.get("layout")
+    if lay == "spotlight":
+        widest = max([st.fm.horizontalAdvance(wd) for wd in st.prep(text).split()] or [st.size])
+        return min(widest * 2.2, stack_box_for(cfg)[0]) + pad * 2, st.row_h * 2.4 + pad * 2
+    if lay in BLOCK_LAYOUTS:
+        box = stack_box_for(cfg)
+        _, bb = shaped_layout(st, text, index, lay, *box)
+        return 2 * max(abs(bb.left()), abs(bb.right()), 1) + pad * 2, 2 * max(abs(bb.top()), abs(bb.bottom()), 1) + pad * 2
+    rows = line_rows(st, text, lay)
     bw = max(st.fm.horizontalAdvance(r) * k for r, k in rows)
     return bw + pad * 2, rows_height(st, rows) + pad * 2
+
+
+# ----------------------------------------------------------------- layouts especiais
+BLOCK_LAYOUTS = {"stack", "arc", "snake", "spotlight", "scatter", "poster", "punchline", "tilted"}
+_shape_cache = {}
+
+
+class _G:
+    """Letra posicionada: âncora (ax, ay) relativa ao centro do bloco, deslocamento (dx, dy) sem escala,
+    escala, rotação (graus, em volta da âncora), índice da palavra e da letra."""
+    __slots__ = ("ch", "ax", "ay", "dx", "dy", "scale", "rot", "wi", "ci")
+
+    def __init__(self, ch, ax, ay, dx, dy, scale, rot, wi, ci):
+        self.ch, self.ax, self.ay, self.dx, self.dy = ch, ax, ay, dx, dy
+        self.scale, self.rot, self.wi, self.ci = scale, rot, wi, ci
+
+
+def _word_glyphs(st, word, ax, ay, scale, rot, wi, c0):
+    adv = st.fm.horizontalAdvance(word)
+    dy = (st.fm.ascent() - st.fm.descent() * 0.35) / 2
+    return [_G(ch, ax, ay, -adv / 2 + st.fm.horizontalAdvance(word[:k]), dy, scale, rot, wi, c0 + k)
+            for k, ch in enumerate(word)]
+
+
+def _glyph_on_path(st, ch, x, y, rot, wi, ci):
+    """Letra centrada em (x, y) de um caminho (arco/serpente), girada junto com ele."""
+    adv = st.fm.horizontalAdvance(ch)
+    return _G(ch, x, y, -adv / 2, (st.fm.ascent() - st.fm.descent() * 0.35) / 2, 1.0, rot, wi, ci)
+
+
+def shaped_layout(st, text, index, layout, max_w, max_h):
+    """Posições das letras para os layouts arco, serpente, espalhado, pôster, punchline e inclinada.
+    Devolve (glifos, caixa) já ajustados para caber em max_w x max_h."""
+    key = (text, index, layout, st.font.key(), int(max_w), int(max_h))
+    if key in _shape_cache:
+        return _shape_cache[key]
+    rnd = _rng(text, index * 7 + 3)
+    words = st.prep(text).split()
+    size = st.size
+    hgt = st.fm.ascent() + st.fm.descent() * 0.3
+    out = []
+
+    if layout in ("arc", "snake", "tilted"):
+        st_wrap = TextStyle(st.cfg)
+        st_wrap.max_w = st.max_w * (0.8 if layout == "arc" else 1.0)
+        rows = st_wrap.wrap(st.prep(text))
+        gi, wi = 0, 0
+        tilt = (-7 if index % 2 else 6) + (rnd() - 0.5) * 3
+        for ri, row in enumerate(rows):
+            wt = st.fm.horizontalAdvance(row)
+            if layout == "arc":
+                phi = max(0.5, min(2.3, wt / (size * 6.5)))   # ângulo total do arco (rad)
+                rad = wt / phi
+                cyc = ri * st.row_h * 1.25 + rad               # centro do círculo, embaixo do texto
+                pos = 0.0
+                for ch in row:
+                    a = st.fm.horizontalAdvance(ch)
+                    th = -phi / 2 + (pos + a / 2) / rad
+                    out.append(_glyph_on_path(st, ch, rad * math.sin(th), cyc - rad * math.cos(th),
+                                              math.degrees(th), wi, gi))
+                    pos += a
+                    gi += 1
+                    wi += ch == " "
+            elif layout == "snake":
+                amp, lam = size * 0.38, size * 7.0
+                phase = rnd() * math.pi * 2
+                pos = -wt / 2
+                y0 = ri * st.row_h * 1.5
+                for ch in row:
+                    a = st.fm.horizontalAdvance(ch)
+                    xc = pos + a / 2
+                    ang = 2 * math.pi * xc / lam + phase
+                    y = y0 + amp * math.sin(ang)
+                    slope = amp * 2 * math.pi / lam * math.cos(ang)
+                    out.append(_glyph_on_path(st, ch, xc, y, math.degrees(math.atan(slope)), wi, gi))
+                    pos += a
+                    gi += 1
+                    wi += ch == " "
+            else:  # tilted: a linha toda inclinada, como num cartaz colado torto
+                y0 = ri * (st.row_h + st.gap)
+                rad_t = math.radians(tilt)
+                pos = -wt / 2
+                for ch in row:
+                    a = st.fm.horizontalAdvance(ch)
+                    xc, yc = pos + a / 2, y0
+                    xr = xc * math.cos(rad_t) - yc * math.sin(rad_t)
+                    yr = xc * math.sin(rad_t) + yc * math.cos(rad_t)
+                    out.append(_glyph_on_path(st, ch, xr, yr, tilt, wi, gi))
+                    pos += a
+                    gi += 1
+                    wi += ch == " "
+            gi += 1
+            wi += 1
+    else:
+        boxes = []  # (palavra, ax, ay, escala, rot)
+        if layout == "scatter":
+            area_w = min(max_w * 0.95, size * max(9, len(words) * 3.0))
+            area_h = size * (3.6 + len(words) * 0.45)
+            placed = []
+            for w_ in words:
+                sc = 0.85 + rnd() * 0.55 + (0.25 if len(w_) >= 6 else 0)
+                ww, hh = st.fm.horizontalAdvance(w_) * sc, hgt * sc
+                best, best_ov = None, None
+                for _ in range(140):
+                    x = (rnd() - 0.5) * max(1.0, area_w - ww)
+                    y = (rnd() - 0.5) * max(1.0, area_h - hh)
+                    ov = sum(max(0, min(x + ww / 2, bx + bw / 2) - max(x - ww / 2, bx - bw / 2) + size * 0.45)
+                             * max(0, min(y + hh / 2, by + bh / 2) - max(y - hh / 2, by - bh / 2) + size * 0.3)
+                             for bx, by, bw, bh in placed)
+                    if best is None or ov < best_ov:
+                        best, best_ov = (x, y), ov
+                    if ov == 0:
+                        break
+                placed.append((best[0], best[1], ww, hh))
+                boxes.append((w_, best[0], best[1], sc, (rnd() - 0.5) * 26))
+        elif layout == "poster":
+            # 2 a 4 linhas equilibradas, cada uma esticada até a mesma largura (como um cartaz)
+            n = len(words)
+            nrows = 1 if n <= 1 else 2 if n <= 4 else 3 if n <= 8 else 4
+            total_chars = sum(len(x) for x in words)
+            rows, cur, acc = [], [], 0
+            for w_ in words:
+                cur.append(w_)
+                acc += len(w_)
+                if len(rows) < nrows - 1 and acc >= total_chars * (len(rows) + 1) / nrows:
+                    rows.append(" ".join(cur))
+                    cur = []
+            if cur:
+                rows.append(" ".join(cur))
+            target = size * 6.5
+            y = 0.0
+            for r_ in rows:
+                sc = max(0.4, min(3.0, target / max(1.0, st.fm.horizontalAdvance(r_))))
+                y += hgt * sc * 0.5
+                boxes.append((r_, 0.0, y, sc, 0.0))
+                y += hgt * sc * 0.5 + size * 0.06
+        elif layout == "punchline":
+            if len(words) >= 2:
+                head, last = " ".join(words[:-1]), words[-1]
+                sub = TextStyle(st.cfg)
+                hrows = sub.wrap(head)
+                y = 0.0
+                for r_ in hrows:
+                    boxes.append((r_, 0.0, y, 1.0, 0.0))
+                    y += st.row_h
+                sc = max(1.6, min(2.8, (st.fm.horizontalAdvance(max(hrows, key=len)) * 0.9)
+                                  / max(1.0, st.fm.horizontalAdvance(last))))
+                boxes.append((last, 0.0, y + hgt * sc * 0.45, sc, -4.0 if index % 2 else 4.0))
+            else:
+                boxes.append((words[0] if words else "", 0.0, 0.0, 2.2, -3.0))
+        wi, gi = 0, 0
+        for w_, x, y, sc, rot in boxes:
+            for g in _word_glyphs(st, w_, x, y, sc, rot, wi, gi):
+                out.append(g)
+            wi += len(w_.split())
+            gi += len(w_) + 1
+
+    if not out:
+        return [], QRectF()
+    xs, ys = [], []
+    for g in out:
+        half = (st.fm.horizontalAdvance(g.ch) / 2 + abs(g.dx)) * g.scale if layout not in ("arc", "snake", "tilted") \
+            else st.fm.horizontalAdvance(g.ch) * 0.6
+        xs += [g.ax - half, g.ax + half]
+        ys += [g.ay - hgt * g.scale * 0.6, g.ay + hgt * g.scale * 0.6]
+    minx, maxx, miny, maxy = min(xs), max(xs), min(ys), max(ys)
+    fit = min(1.0, max_w * 0.92 / max(1.0, maxx - minx), max_h * 0.86 / max(1.0, maxy - miny))
+    mx, my = (minx + maxx) / 2, (miny + maxy) / 2
+    for g in out:
+        g.ax = (g.ax - mx) * fit
+        g.ay = (g.ay - my) * fit
+        g.scale *= fit
+    box = QRectF((minx - mx) * fit, (miny - my) * fit, (maxx - minx) * fit, (maxy - miny) * fit)
+    if len(_shape_cache) > 200:
+        _shape_cache.clear()
+    _shape_cache[key] = (out, box)
+    return out, box
+
+
+def _word_timeline(text, sung_dur):
+    """Início de cada palavra dentro do tempo cantado (palavras longas duram mais)."""
+    words = text.split()
+    weights = [len(w) + 2 for w in words]
+    total = sum(weights) or 1
+    t, starts = 0.0, []
+    for wgt in weights:
+        starts.append(t)
+        t += sung_dur * 0.9 * wgt / total
+    return words, starts
+
+
+def draw_shaped(p, st, text, w, h, t, start, hide, accent, cfg, index, now, leaving=False, box=None):
+    layout = cfg.get("layout")
+    since = t - start
+    _, _, sung_dur = _timing(text, start, hide)
+    exit_drift = cfg.get("exit_animation") == "drift"
+    ex_len = 1.1 if exit_drift else EXIT * 1.6
+    ex = clamp((t - hide) / ex_len) if leaving else 0.0
+    cx0, cy0 = w / 2, h / 2
+
+    if layout == "spotlight":  # uma palavra por vez, grande, no ritmo do canto
+        words, starts = _word_timeline(st.prep(text), max(0.8, sung_dur))
+        k = max([i for i, s0 in enumerate(starts) if since >= s0] or [0])
+        out = []
+        maxw = (box[0] if box else w) * 0.9
+        for i in (k - 1, k):
+            if i < 0 or i >= len(words):
+                continue
+            wd = words[i]
+            sc = max(1.0, min(2.2, maxw / max(1.0, st.fm.horizontalAdvance(wd))))
+            local = since - starts[i]
+            if i == k:
+                a = clamp(local / 0.1)
+                pop = 0.6 + 0.4 * ease_out_back(clamp(local / 0.16), 2.4)
+                a *= (1 - ex)
+            else:
+                fade = clamp((since - starts[k]) / 0.08)
+                a, pop = 1 - fade, 1 - 0.25 * fade
+            if a <= 0.01:
+                continue
+            gs = _word_glyphs(st, wd, 0.0, 0.0, sc * pop, 0.0, i, 0)
+            out.append((gs, a))
+        glyphs, alphas = [], []
+        for gs, a in out:
+            for g in gs:
+                gg = Glyph()
+                gg.ch, gg.i, gg.word, gg.font = g.ch, g.ci, g.wi, None
+                gg.cx, gg.cy, gg.scale = cx0, cy0, g.scale
+                gg.x, gg.y = cx0 + g.dx, cy0 + g.dy
+                ox, oy = _idle_offset(cfg, gg, now, st.size * g.scale)
+                gg.x += ox / max(0.1, g.scale)
+                gg.y += oy / max(0.1, g.scale)
+                glyphs.append(gg)
+                alphas.append(a)
+        n = max(1, len(st.prep(text)))
+        colours = [glyph_colour(cfg, accent, g.word * 3, len(words) * 3, now) for g in glyphs]
+        p.save()
+        _block_idle(p, cfg, now, cx0, cy0, st.size)
+        _paint_glyphs(p, st, glyphs, colours, alphas, None, cfg, accent)
+        p.restore()
+        bw = st.fm.horizontalAdvance(words[k] if words else "") * 2
+        return QRectF(cx0 - bw / 2, cy0 - st.row_h, bw, st.row_h * 2), start + 0.2 + 0 * n
+
+    glyphs_l, bbox = shaped_layout(st, text, index, layout, *(box or (w, h)))
+    if not glyphs_l:
+        return None
+    total = max(g.ci for g in glyphs_l) + 1
+    path_like = layout in ("arc", "snake", "tilted")
+    n_words = max(g.wi for g in glyphs_l) + 1
+    step_w = clamp(sung_dur * 0.75 / max(1, n_words), 0.12, 0.45)
+    step_c = min(0.05, sung_dur * 0.6 / max(1, total))
+    glyphs, alphas = [], []
+    for g in glyphs_l:
+        if path_like:
+            appear = clamp((since - g.ci * step_c) / 0.14)
+            rise = (1 - ease_out(appear)) * st.size * 0.35
+            pop = 1.0
+        else:
+            appear = clamp((since - g.wi * step_w) / 0.14)
+            rise = 0.0
+            pop = 1.0 if appear >= 1 else 0.7 + 0.3 * ease_out_back(appear, 2.4)
+        a = appear
+        gg = Glyph()
+        gg.ch, gg.i, gg.word, gg.font = g.ch, g.ci, g.wi, None
+        gg.cx, gg.cy = cx0 + g.ax, cy0 + g.ay + rise
+        gg.scale = g.scale * pop
+        gg.x, gg.y = gg.cx + g.dx, gg.cy + g.dy
+        gg.rot, gg.rx, gg.ry = g.rot, gg.cx, gg.cy
+        if leaving:
+            if exit_drift:
+                e = clamp((t - hide - g.ci * min(0.022, 0.45 / total)) / 0.6) ** 2
+                gg.cx += st.size * 0.7 * e
+                gg.cy -= st.size * 0.3 * e
+                gg.x += st.size * 0.7 * e
+                gg.y -= st.size * 0.3 * e
+                gg.rx, gg.ry = gg.cx, gg.cy
+                gg.rot += 10 * e
+                a *= 1 - e
+            else:
+                a *= 1 - ex
+        ox, oy = _idle_offset(cfg, gg, now, st.size * g.scale)
+        gg.x += ox / max(0.1, g.scale)
+        gg.y += oy / max(0.1, g.scale)
+        glyphs.append(gg)
+        alphas.append(a)
+    colours = [glyph_colour(cfg, accent, g.i, total, now) for g in glyphs]
+    karaoke = None
+    if cfg["karaoke"] and not leaving:
+        karaoke = (clamp(since / (sung_dur * 0.92)) * total, total)
+    p.save()
+    _block_idle(p, cfg, now, cx0, cy0, st.size)
+    _paint_glyphs(p, st, glyphs, colours, alphas, karaoke, cfg, accent)
+    p.restore()
+    done = start + (n_words - 1) * step_w + 0.14 if not path_like else start + total * step_c + 0.14
+    return bbox.translated(cx0, cy0), done
+
+
+def draw_block(p, st, text, w, h, t, start, hide, accent, cfg, index, now, leaving=False, box=None):
+    if cfg.get("layout") == "stack":
+        return draw_stack(p, st, text, w, h, t, start, hide, accent, cfg, index, now, leaving, box)
+    return draw_shaped(p, st, text, w, h, t, start, hide, accent, cfg, index, now, leaving, box)
 
 
 # ----------------------------------------------------------------- efeitos
@@ -822,7 +1131,7 @@ def draw_lyrics(p, w, h, cfg, lines, windows, t, album_color, playing=True, now=
         now = t
     p.setRenderHint(QPainter.Antialiasing, True)
     p.setRenderHint(QPainter.TextAntialiasing, True)
-    stack = cfg.get("layout") == "stack"
+    stack = cfg.get("layout") in BLOCK_LAYOUTS
     st = TextStyle(cfg)
     f = compute_frame(lines, windows, t, cfg, stack)
     if only_parity is not None:  # posição aleatória: cada janela desenha só as linhas dela
@@ -844,10 +1153,10 @@ def draw_lyrics(p, w, h, cfg, lines, windows, t, album_color, playing=True, now=
             p.setBrush(QColor(8, 8, 12, 110))
             p.drawRoundedRect(QRectF(w * 0.04, h * 0.06, w * 0.92, h * 0.88), st.size * 0.4, st.size * 0.4)
         for i, ln, s, hide in f.leaving:
-            draw_stack(p, st, ln.text, w, h, t, s, hide, accent_for(cfg, album_color, i), cfg, i, now, True, stack_box)
+            draw_block(p, st, ln.text, w, h, t, s, hide, accent_for(cfg, album_color, i), cfg, i, now, True, stack_box)
         if f.current:
             i, ln, s, hide = f.current
-            res = draw_stack(p, st, ln.text, w, h, t, s, hide, accent_for(cfg, album_color, i), cfg, i, now,
+            res = draw_block(p, st, ln.text, w, h, t, s, hide, accent_for(cfg, album_color, i), cfg, i, now,
                              box=stack_box)
             if res and cfg.get("sparkle"):
                 bbox, done_at = res

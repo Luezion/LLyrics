@@ -30,7 +30,7 @@ When a new version comes out, the app shows a window to update with one click.
 
 - Entrances: typewriter (synced to the singing), drop, rise, words, fade, pop, wave
 - Exits: same as entrance, fade, blown away
-- Layouts: lines, **stack** (key words big, little words small), first word highlighted (with or without tilt)
+- 11 layouts: lines, **stack** (key words big, little words small), first word highlighted (with or without tilt), **arc**, **snake**, **spotlight** (one big word at a time), **scatter**, **poster**, **punchline** and **tilted**
 - Karaoke, instrumental countdown, previous line and next line preview
 - Album cover colour, palettes, rainbow, custom colour, **2 or 3 colour gradients**, flowing rainbow
 - Idle motion (shake, wave, bounce, pulse, float, sway), sparkles and party mode
