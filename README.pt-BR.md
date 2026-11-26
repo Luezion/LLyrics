@@ -11,7 +11,7 @@ Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra d
 - Lê o que está tocando em qualquer player que aparece no controle de mídia do Windows (Spotify, YouTube e YouTube Music no navegador, Apple Music, Deezer, VLC…)
 - Busca a letra sincronizada no [lrclib.net](https://lrclib.net)
 - Desenha a letra numa janela transparente, sempre por cima, que **deixa o clique passar** para o jogo
-- Widget "tocando agora" com capa, título, artista e barra de progresso
+- Widget "tocando agora" com capa, título, artista e barra de progresso; a capa pode ser quadrada, redonda ou um disco de vinil girando
 - Disponível em **English, Español e Português (Brasil)**
 
 ### Estilos

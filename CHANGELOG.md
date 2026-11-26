@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.4.0
+
+### English
+- New cover styles for the player widget: rounded square, square, circle or a spinning vinyl record (Settings > Widget > Cover style)
+
+### Español
+- Nuevos estilos de portada para el widget: cuadrado redondeado, cuadrado, círculo o un disco de vinilo girando (Ajustes > Widget > Estilo de la portada)
+
+### Português
+- Novos estilos de capa no widget do player: quadrado arredondado, quadrado, círculo ou um disco de vinil girando (Configurações > Widget > Estilo da capa)
+
 ## 1.3.0
 
 ### English

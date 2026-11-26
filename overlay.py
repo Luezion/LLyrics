@@ -139,6 +139,8 @@ class Controller(QObject):
         self.lyrics_win2 = LyricsWindow(self, 1)   # segunda janela, só no modo aleatório
         self.widget_win = WidgetWindow(self)
         self._seed = random.random()
+        self._disc_angle = 0.0
+        self._last_tick = time.monotonic()
         self._rand_geo = {}
         self._cfg_version = 0
         self.lyrics_win.moved.connect(self._lyrics_moved)
@@ -174,6 +176,7 @@ class Controller(QObject):
 
     def widget_info(self):
         info = render.WidgetInfo()
+        info.disc_angle = self._disc_angle
         if self.snap is not None and self.snap.title:
             info.title = self.snap.title
             info.artist = self.snap.artist
@@ -421,6 +424,12 @@ class Controller(QObject):
                 winutil.force_topmost(w)
 
     def _tick(self):
+        now = time.monotonic()
+        dt_ = min(0.2, now - self._last_tick)
+        self._last_tick = now
+        spinning = (self.snap is not None and self.playing) or ((self.demo or self.edit) and self.snap is None)
+        if spinning:
+            self._disc_angle = (self._disc_angle + dt_ * 100.0) % 360.0  # ~33 rpm, como um vinil
         self._update_visibility()
         if self.lyrics_win.random_mode:
             self._place_random()

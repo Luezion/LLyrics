@@ -23,7 +23,7 @@ When a new version comes out, the app shows a window to update with one click.
 - Reads whatever is playing in any player that shows up in the Windows media controls (Spotify, YouTube and YouTube Music in the browser, Apple Music, Deezer, VLC…)
 - Fetches synced lyrics from [lrclib.net](https://lrclib.net)
 - Draws the lyrics in a transparent, always-on-top window that **lets clicks pass through** to the game
-- "Now playing" widget with cover, title, artist and progress bar
+- "Now playing" widget with cover, title, artist and progress bar; the cover can be a square, a circle or a spinning vinyl record
 - Available in **English, Español and Português (Brasil)**
 
 ### Styles

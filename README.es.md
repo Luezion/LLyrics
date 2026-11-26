@@ -23,7 +23,7 @@ Cuando sale una versión nueva, la app muestra una ventana para actualizar con u
 - Lee lo que suena en cualquier reproductor que aparezca en los controles multimedia de Windows (Spotify, YouTube y YouTube Music en el navegador, Apple Music, Deezer, VLC…)
 - Busca la letra sincronizada en [lrclib.net](https://lrclib.net)
 - Dibuja la letra en una ventana transparente, siempre encima, que **deja pasar los clics** al juego
-- Widget "reproduciendo ahora" con portada, título, artista y barra de progreso
+- Widget "reproduciendo ahora" con portada, título, artista y barra de progreso; la portada puede ser un cuadrado, un círculo o un disco de vinilo girando
 - Disponible en **English, Español y Português (Brasil)**
 
 ### Estilos

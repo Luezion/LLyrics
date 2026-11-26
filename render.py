@@ -895,8 +895,103 @@ def draw_lyrics(p, w, h, cfg, lines, windows, t, album_color, playing=True, now=
 
 
 # ----------------------------------------------------------------- widget
+def _cover_art(p, rect, info, accent, op):
+    """Capa (ou um ♪ na cor de destaque quando não tem capa) preenchendo o retângulo."""
+    if info.cover is not None and not info.cover.isNull():
+        p.setOpacity(op)
+        pm = info.cover
+        src = QRectF(pm.rect())
+        side = min(src.width(), src.height())
+        src = QRectF((src.width() - side) / 2, (src.height() - side) / 2, side, side)
+        p.drawPixmap(rect, pm, src)
+        p.setOpacity(1)
+    else:
+        g = QLinearGradient(rect.topLeft(), rect.bottomRight())
+        g.setColorAt(0, with_alpha(accent, op))
+        g.setColorAt(1, with_alpha(accent.darker(220), op))
+        p.fillRect(rect, g)
+        nf = QFont(family("poppins"))
+        nf.setPixelSize(int(rect.height() * 0.45))
+        p.setFont(nf)
+        p.setPen(QColor(255, 255, 255, int(220 * op)))
+        p.drawText(rect, Qt.AlignCenter, "♪")
+
+
+def draw_cover(p, rect, style, info, accent, op, s=1.0):
+    """Estilos da capa no widget: quadrado arredondado, quadrado, círculo ou disco de vinil girando."""
+    p.save()
+    clip = QPainterPath()
+    if style == "square":
+        clip.addRect(rect)
+    elif style in ("circle", "vinyl"):
+        clip.addEllipse(rect)
+    else:
+        clip.addRoundedRect(rect, 10 * s, 10 * s)
+
+    if style != "vinyl":
+        p.setClipPath(clip)
+        if style == "circle" and info.playing:
+            # gira devagar, como o adesivo de música do Instagram
+            c = rect.center()
+            p.translate(c)
+            p.rotate(info.disc_angle * 0.35)
+            p.translate(-c)
+        _cover_art(p, rect, info, accent, op)
+        p.restore()
+        return
+
+    # ---- disco de vinil
+    c = rect.center()
+    r = rect.width() / 2
+    p.setPen(Qt.NoPen)
+    p.setBrush(QColor(0, 0, 0, int(90 * op)))
+    p.drawEllipse(c + QPointF(1.5 * s, 2 * s), r, r)  # sombra
+    p.translate(c)
+    p.rotate(info.disc_angle)
+    p.translate(-c)
+    p.setBrush(QColor(14, 14, 16, int(255 * op)))
+    p.drawEllipse(c, r, r)
+    # sulcos
+    for k in range(9):
+        rr = r * (0.94 - k * 0.045)
+        p.setPen(QPen(QColor(255, 255, 255, int((10 if k % 2 else 18) * op)), max(0.6, 0.7 * s)))
+        p.setBrush(Qt.NoBrush)
+        p.drawEllipse(c, rr, rr)
+    # rótulo do disco com a capa
+    lr = r * 0.58
+    label = QRectF(c.x() - lr, c.y() - lr, lr * 2, lr * 2)
+    lab_clip = QPainterPath()
+    lab_clip.addEllipse(label)
+    p.save()
+    p.setClipPath(lab_clip)
+    _cover_art(p, label, info, accent, op)
+    p.restore()
+    p.setPen(QPen(QColor(0, 0, 0, int(120 * op)), max(1.0, 1.2 * s)))
+    p.setBrush(Qt.NoBrush)
+    p.drawEllipse(c, lr, lr)
+    # furo do meio
+    p.setPen(Qt.NoPen)
+    p.setBrush(QColor(20, 20, 24, int(255 * op)))
+    p.drawEllipse(c, r * 0.07, r * 0.07)
+    p.restore()
+    # brilho do vinil (não gira, como a luz refletindo)
+    p.save()
+    clip2 = QPainterPath()
+    clip2.addEllipse(rect)
+    p.setClipPath(clip2)
+    sheen = QLinearGradient(rect.topLeft(), rect.bottomRight())
+    sheen.setColorAt(0.0, QColor(255, 255, 255, 0))
+    sheen.setColorAt(0.42, QColor(255, 255, 255, int(28 * op)))
+    sheen.setColorAt(0.5, QColor(255, 255, 255, 0))
+    sheen.setColorAt(0.62, QColor(255, 255, 255, int(16 * op)))
+    sheen.setColorAt(1.0, QColor(255, 255, 255, 0))
+    p.fillRect(rect, sheen)
+    p.restore()
+
+
 class WidgetInfo:
     def __init__(self):
+        self.disc_angle = 0.0
         self.title = ""
         self.artist = ""
         self.position = 0.0
@@ -928,29 +1023,7 @@ def draw_widget(p, cfg, info, album_color):
     pad = 12 * s
     cs = H - pad * 2
     crect = QRectF(pad, pad, cs, cs)
-    clip = QPainterPath()
-    clip.addRoundedRect(crect, 10 * s, 10 * s)
-    p.save()
-    p.setClipPath(clip)
-    if info.cover is not None and not info.cover.isNull():
-        p.setOpacity(op)
-        pm = info.cover
-        src = QRectF(pm.rect())
-        side = min(src.width(), src.height())
-        src = QRectF((src.width() - side) / 2, (src.height() - side) / 2, side, side)
-        p.drawPixmap(crect, pm, src)
-        p.setOpacity(1)
-    else:
-        g = QLinearGradient(crect.topLeft(), crect.bottomRight())
-        g.setColorAt(0, with_alpha(accent, op))
-        g.setColorAt(1, with_alpha(accent.darker(220), op))
-        p.fillRect(crect, g)
-        nf = QFont(family("poppins"))
-        nf.setPixelSize(int(cs * 0.45))
-        p.setFont(nf)
-        p.setPen(QColor(255, 255, 255, int(220 * op)))
-        p.drawText(crect, Qt.AlignCenter, "♪")
-    p.restore()
+    draw_cover(p, crect, cfg.get("cover_style", "rounded"), info, accent, op, s)
 
     # textos
     tx = pad * 2 + cs - 2 * s

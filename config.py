@@ -75,6 +75,8 @@ PARTY_EFFECTS = [(k, f"party.{k}") for k in ("both", "notes", "sparkles")]
 POSITION_MODES = [(k, f"posmode.{k}") for k in ("fixed", "random")]
 WIDGET_POSITIONS = [(k, f"wpos.{k}") for k in ("top_left", "top_right", "bottom_left", "bottom_right", "custom")]
 
+COVER_STYLES = [(k, f"cover.{k}") for k in ("rounded", "square", "circle", "vinyl")]
+
 HOTKEY_DEFAULTS = {
     "hotkey_toggle": "Ctrl+Shift+L",
     "hotkey_move": "Ctrl+Shift+K",
@@ -139,6 +141,7 @@ DEFAULTS = {
     "widget_y": 0.05,
     "widget_scale": 1.0,
     "widget_opacity": 0.9,
+    "cover_style": "rounded",
     # Monitor
     "screen_index": 0,
     # Atualizações
