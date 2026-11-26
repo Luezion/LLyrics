@@ -197,105 +197,194 @@ def cover_palette(image_bytes):
 
 
 # ------------------------------------------------------------------ o estilo
-_COOL = ["#A9E4FF", "#C4B3FF", "#A3B1C9", "#8FC9F2"]
-_WARM = ["#FF7F6E", "#FFC857", "#FFB3C8", "#FFF1D0"]
+# Em vez de montar peça por peça, o gerador escolhe uma "receita" de visual completa
+# (pensada como um look de verdade) e pinta com as cores da capa.
+
+_BASE = {
+    "uppercase": False, "bold": True, "outline": False, "outline_thickness": 1.0, "drop_shadow": True,
+    "glow": False, "background": False, "karaoke": False, "countdown": True, "preview": False,
+    "previous_line": False, "sparkle": False, "sparkle_amount": 1.0, "party": False, "party_effects": "both",
+    "idle": "none", "idle_speed": 1.0, "idle_strength": 1.0, "exit_animation": "auto", "typewriter_sync": True,
+    "typewriter_speed": 1.25, "letter_spacing": 0.5, "line_spacing": 4, "line_width": 900, "lyrics_opacity": 1.0,
+}
+
+# fam: gêneros que combinam; mood: climas; energy: low/mid/high; colour: tratamento de cor
+RECIPES = [
+    dict(name="shake", fam="rap latin pop electronic brazil", mood="party heavy", energy="high mid",
+         colour="vivid", dark=None, style=dict(
+             font="pixelify", layout="stack", animation="fade", idle="shake", idle_strength=0.5,
+             idle_speed=0.25, uppercase=True, sparkle=True, sparkle_amount=0.5, party=True, text_size=40,
+             letter_spacing=0)),
+    dict(name="void", fam="electronic pop rnb", mood="sad faith love", energy="low mid", colour="mono_deep",
+         dark=True, style=dict(
+             font="pixelify", layout="words_tilted", animation="typewriter", exit_animation="drift",
+             idle="float", idle_strength=0.25, idle_speed=0.75, outline=True, glow=True, karaoke=True,
+             sparkle=True, party=True, text_size=44, letter_spacing=1)),
+    dict(name="neon", fam="electronic pop latin", mood="party love", energy="mid high", colour="neon",
+         dark=True, style=dict(
+             font="righteous", layout="lines", animation="typewriter", idle="pulse", idle_strength=0.35,
+             idle_speed=0.6, glow=True, karaoke=True, uppercase=True, letter_spacing=2.5, text_size=46,
+             sparkle=True, sparkle_amount=0.75)),
+    dict(name="arena", fam="rock", mood="heavy party", energy="high mid", colour="hot",
+         dark=None, style=dict(
+             font="bebas", layout="words_tilted", animation="drop", idle="shake", idle_strength=0.6,
+             idle_speed=0.35, outline=True, outline_thickness=1.4, uppercase=True, karaoke=True,
+             letter_spacing=1.5, text_size=54, exit_animation="fade")),
+    dict(name="street", fam="rap latin brazil", mood="party heavy", energy="high mid", colour="vivid3",
+         dark=None, style=dict(
+             font="bebas", layout="stack", animation="pop", idle="bounce", idle_strength=0.35, idle_speed=0.8,
+             outline=True, outline_thickness=1.2, uppercase=True, karaoke=True, text_size=42, letter_spacing=1)),
+    dict(name="velvet", fam="rnb classic acoustic pop", mood="love sad", energy="low mid", colour="warm_soft",
+         dark=None, style=dict(
+             font="playfair", layout="words", animation="rise", exit_animation="fade", idle="float",
+             idle_strength=0.3, idle_speed=0.5, glow=True, text_size=46, letter_spacing=0.5)),
+    dict(name="letter", fam="pop brazil latin rnb acoustic", mood="love", energy="low mid", colour="love",
+         dark=None, style=dict(
+             font="pacifico", layout="lines", animation="words", exit_animation="drift", idle="float",
+             idle_strength=0.35, idle_speed=0.6, glow=True, sparkle=True, sparkle_amount=1.5, text_size=44,
+             bold=False, letter_spacing=0)),
+    dict(name="rain", fam="acoustic brazil pop rnb rock classic", mood="sad", energy="low mid",
+         colour="cool", dark=None, style=dict(
+             font="montserrat", layout="lines", animation="fade", exit_animation="drift", idle="float",
+             idle_strength=0.2, idle_speed=0.4, glow=True, bold=False, text_size=42, letter_spacing=1.5,
+             countdown=True)),
+    dict(name="arcade", fam="electronic pop", mood="party", energy="high", colour="rainbow",
+         dark=None, style=dict(
+             font="press_start", layout="lines", animation="wave", idle="bounce", idle_strength=0.3,
+             idle_speed=0.7, outline=True, uppercase=True, party=True, sparkle=True, text_size=28,
+             letter_spacing=0, line_spacing=10)),
+    dict(name="sunset", fam="pop brazil latin rock", mood="party love", energy="mid", colour="sunset",
+         dark=None, style=dict(
+             font="righteous", layout="words_tilted", animation="typewriter", idle="sway", idle_strength=0.4,
+             idle_speed=0.5, outline=True, glow=True, uppercase=True, karaoke=True, text_size=46,
+             letter_spacing=1)),
+    dict(name="campfire", fam="acoustic brazil classic", mood="love faith sad", energy="low mid",
+         colour="honey", dark=None, style=dict(
+             font="lobster", layout="lines", animation="typewriter", exit_animation="fade", idle="float",
+             idle_strength=0.25, idle_speed=0.5, glow=True, text_size=46, bold=False, letter_spacing=0.5)),
+    dict(name="halo", fam="acoustic classic pop rnb", mood="faith", energy="low mid", colour="gold",
+         dark=None, style=dict(
+             font="playfair", layout="words", animation="rise", exit_animation="fade", idle="float",
+             idle_strength=0.3, idle_speed=0.5, glow=True, sparkle=True, sparkle_amount=2.0, text_size=46)),
+    dict(name="comic", fam="pop latin brazil", mood="party love", energy="high mid", colour="vivid3",
+         dark=False, style=dict(
+             font="comic_relief", layout="stack", animation="pop", idle="bounce", idle_strength=0.4,
+             idle_speed=0.9, outline=True, outline_thickness=1.5, uppercase=True, sparkle=True,
+             text_size=40, letter_spacing=0.5)),
+    dict(name="chrome", fam="rock electronic rap", mood="heavy sad", energy="mid low", colour="ice",
+         dark=True, style=dict(
+             font="montserrat", layout="words", animation="drop", exit_animation="drift", idle="float",
+             idle_strength=0.2, idle_speed=0.4, outline=True, glow=True, uppercase=True, letter_spacing=3,
+             text_size=44)),
+]
+
+# Paletas prontas, usadas quando a capa não tem cores fortes
+_FALLBACK = {
+    "vivid": ["#FF426C", "#FF8A2B", "#FFD166"], "vivid3": ["#FF5E9A", "#FFC94D", "#5EE6C8"],
+    "neon": ["#FF4FD8", "#7A5CFF", "#38E1FF"], "hot": ["#FF5A36", "#FFB547", "#FFE08A"],
+    "mono_deep": ["#BC1CFA", "#E2B8FF", "#7B2CFF"], "warm_soft": ["#F7C59F", "#F2879B", "#FFF1D0"],
+    "love": ["#FF8FB1", "#C4B3FF", "#FFD1DC"], "cool": ["#A9E4FF", "#C4B3FF", "#8FC9F2"],
+    "rainbow": ["#FF7F6E", "#FFC857", "#8DF2C4"], "sunset": ["#FF7F6E", "#FFC857", "#E38CF2"],
+    "honey": ["#FFC857", "#FFF1D0", "#F7A35C"], "gold": ["#FFE3A3", "#FFFFFF", "#FFC857"],
+    "ice": ["#DDF3FF", "#A9E4FF", "#C4B3FF"],
+}
+
+
+def _hsv(hexcol):
+    from PySide6.QtGui import QColor
+    c = QColor(hexcol)
+    return max(0.0, c.hsvHueF()), c.hsvSaturationF(), c.valueF()
+
+
+def _hex(h, s, v):
+    from PySide6.QtGui import QColor
+    return QColor.fromHsvF(h % 1.0, max(0.0, min(1.0, s)), max(0.0, min(1.0, v))).name().upper()
+
+
+def _paint(treatment, palette, rnd):
+    """Cores (principal, segunda, terceira, contorno) em harmonia, a partir da capa."""
+    pal = list(palette) or list(_FALLBACK[treatment])
+    h0, s0, v0 = _hsv(pal[0])
+    if len(pal) < 2:  # inventa vizinhas harmônicas da cor da capa
+        pal += [_hex(h0 + 0.09, s0 * 0.9, 1.0), _hex(h0 - 0.08, s0, 0.95)]
+    if len(pal) < 3:
+        pal.append(_hex(_hsv(pal[1])[0] + 0.08, 0.6, 1.0))
+    hs = [_hsv(c) for c in pal]
+
+    if treatment in ("vivid", "vivid3"):
+        cols = [_hex(h, max(s, 0.65), 1.0) for h, s, v in hs]
+    elif treatment == "neon":
+        cols = [_hex(h, 0.85, 1.0) for h, s, v in hs]
+    elif treatment == "hot":  # vermelho/laranja/amarelo; usa a capa se ela já for quente
+        warm = palette and (h0 < 0.15 or h0 > 0.92)
+        cols = ([_hex(h0, 0.8, 1.0), _hex(h0 + 0.06, 0.75, 1.0), _hex(h0 + 0.12, 0.5, 1.0)] if warm
+                else list(_FALLBACK["hot"]))
+    elif treatment == "mono_deep":  # uma cor só, profunda, com variações
+        cols = [_hex(h0, max(s0, 0.85), 0.98), _hex(h0, 0.35, 1.0), _hex(h0 + 0.04, 0.9, 0.8)]
+    elif treatment == "warm_soft":
+        cols = [_hex(h, min(s, 0.45), 1.0) for h, s, v in hs]
+    elif treatment == "love":
+        cols = [_hex(0.95 if not palette else h, 0.45, 1.0) for h, s, v in hs[:1]] + ["#C4B3FF", "#FFD1DC"]
+    elif treatment == "cool":
+        cols = [_hex(0.55 + (h - 0.55) * 0.3, min(s, 0.35), 1.0) for h, s, v in hs]
+    elif treatment in ("rainbow",):
+        cols = [_hex(h, 0.7, 1.0) for h, s, v in hs]
+    elif treatment == "sunset":
+        cols = ["#FF7F6E", "#FFC857", _hex(h0, 0.55, 1.0)] if palette else list(_FALLBACK["sunset"])
+    elif treatment == "honey":
+        cols = list(_FALLBACK["honey"])
+    elif treatment == "gold":
+        cols = list(_FALLBACK["gold"])
+    else:  # ice
+        cols = [_hex(0.55, 0.15, 1.0), _hex(h0, 0.3, 1.0), "#FFFFFF"]
+    outline = _hex(h0, 0.6, 0.13)  # contorno escuro da mesma cor: fica bem mais bonito que preto
+    return cols, outline
 
 
 def generate(title, artist, lines, cover_bytes=None, family=None):
-    """Devolve (estilo, resumo). resumo = dict(family, mood, energy) para mostrar ao usuário."""
+    """Devolve (estilo, resumo). resumo = dict(family, mood, energy, cover, look)."""
     seed = hashlib.sha1(f"{_norm(artist)}|{_norm(title)}".encode("utf-8")).hexdigest()
     rnd = random.Random(seed)
     energy = lyric_energy(lines) if lines else 0.5
     mood, _ = lyric_mood(lines) if lines else (None, {})
     palette, dark_cover = cover_palette(cover_bytes)
+    elevel = "high" if energy > 0.6 else "low" if energy < 0.3 else "mid"
     fam = family or "pop"
 
-    def pick(*opts):
-        return rnd.choice(opts)
+    scored = []
+    for r in RECIPES:
+        score = 0.0
+        score += 2.0 if fam in r["fam"].split() else 0.0
+        score += 2.2 if mood and mood in r["mood"].split() else (0.3 if not mood else -0.6)
+        score += 1.2 if elevel in r["energy"].split() else -0.8
+        if r["dark"] is not None:
+            score += 0.5 if r["dark"] == dark_cover else -0.3
+        score += rnd.random() * 1.1  # variedade: músicas parecidas não ficam todas iguais
+        scored.append((score, r))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    recipe = scored[0][1]
 
-    st = {
-        "uppercase": False, "bold": True, "outline": False, "drop_shadow": True, "glow": False,
-        "background": False, "karaoke": False, "countdown": True, "preview": False, "previous_line": False,
-        "sparkle": False, "sparkle_amount": 1.0, "party": False, "party_effects": "both", "idle": "none",
-        "idle_speed": 1.0, "idle_strength": 1.0, "exit_animation": "auto", "typewriter_sync": True,
-        "letter_spacing": 0.5, "line_spacing": 4, "outline_thickness": 1.0, "outline_colour": "#141414",
-        "lyrics_opacity": 1.0,
-    }
-
-    # fonte e layout pelo gênero
-    if fam == "rock":
-        st.update(font=pick("bebas", "righteous", "bebas"), uppercase=True, outline=True,
-                  layout=pick("lines", "words_tilted"), animation=pick("drop", "typewriter"))
-    elif fam == "rap":
-        st.update(font=pick("bebas", "montserrat", "pixelify"), uppercase=True, outline=True, karaoke=True,
-                  layout="stack", animation="typewriter")
-    elif fam == "electronic":
-        st.update(font=pick("righteous", "press_start", "pixelify", "montserrat"), uppercase=True, glow=True,
-                  layout=pick("lines", "words"), animation=pick("wave", "pop"))
-    elif fam == "latin":
-        st.update(font=pick("righteous", "poppins", "bebas"), uppercase=pick(True, False), karaoke=True,
-                  layout=pick("stack", "words_tilted"), animation="pop")
-    elif fam == "brazil":
-        st.update(font=pick("poppins", "lobster", "montserrat"), karaoke=True,
-                  layout=pick("lines", "words"), animation=pick("typewriter", "rise"))
-    elif fam == "rnb":
-        st.update(font=pick("playfair", "poppins", "lobster"), glow=True, layout="lines",
-                  animation=pick("rise", "fade"), exit_animation="fade")
-    elif fam == "acoustic":
-        st.update(font=pick("playfair", "eagle_lake", "poppins"), layout="lines", animation="typewriter")
-    elif fam == "classic":
-        st.update(font=pick("playfair", "eagle_lake"), layout="lines", animation="fade", exit_animation="fade",
-                  bold=False)
-    else:  # pop
-        st.update(font=pick("poppins", "montserrat", "bebas"), karaoke=True,
-                  layout=pick("lines", "words", "words_tilted"), animation=pick("typewriter", "pop", "words"))
-
-    # clima da letra
-    if mood == "love":
-        st.update(sparkle=True, idle="float", idle_strength=0.4, glow=True, exit_animation="drift",
-                  font=pick(st["font"], "pacifico", "lobster") if fam not in ("rock", "rap") else st["font"])
-    elif mood == "sad":
-        st.update(animation="fade", exit_animation=pick("drift", "fade"), idle="float", idle_strength=0.25,
-                  idle_speed=0.6, party=False, sparkle=False, uppercase=False)
-    elif mood == "party":
-        st.update(party=True, idle="shake" if fam in ("rock", "rap") else pick("bounce", "pulse"), sparkle=True)
-    elif mood == "heavy":
-        st.update(idle="shake", idle_strength=0.4 + energy * 0.6, idle_speed=0.3 + energy * 0.4,
-                  uppercase=True, outline=True, outline_thickness=1.3)
-    elif mood == "faith":
-        st.update(glow=True, sparkle=True, idle="float", idle_strength=0.3, exit_animation="fade")
-
-    # ritmo
-    if energy > 0.7 and st["idle"] == "none":
-        st["idle"] = "shake" if fam in ("rock", "rap") else pick("bounce", "pulse")
-        st["idle_strength"] = 0.5
-    if energy > 0.75 and fam in ("electronic", "latin", "pop") and mood != "sad":
-        st["party"] = True
-    if energy < 0.25 and st["animation"] in ("pop", "drop", "wave"):
-        st["animation"] = "fade"
-    st["text_size"] = 40 if st["layout"] == "stack" else (40 if st["font"] == "press_start" else 46)
-    if st["font"] == "press_start":
-        st["text_size"] = 30
-        st["letter_spacing"] = 0
-
-    # cores
-    if fam == "electronic" and mood in (None, "party") and rnd.random() < 0.5:
-        st.update(accent="custom", custom_colour=(palette[0] if palette else "#C4B3FF"), colour_mode="rainbow_flow")
-    elif len(palette) >= 3 and energy > 0.45:
-        st.update(accent="custom", custom_colour=palette[0], second_colour=palette[1], third_colour=palette[2],
+    st = dict(_BASE)
+    st.update(recipe["style"])
+    cols, outline = _paint(recipe["colour"], palette, rnd)
+    if recipe["colour"] == "rainbow":
+        st.update(accent="custom", custom_colour=cols[0], colour_mode="rainbow_flow")
+    elif recipe["colour"] in ("vivid3", "sunset", "neon") or (len(palette) >= 3 and rnd.random() < 0.5):
+        st.update(accent="custom", custom_colour=cols[0], second_colour=cols[1], third_colour=cols[2],
                   colour_mode="gradient3")
-    elif len(palette) >= 2:
-        st.update(accent="custom", custom_colour=palette[0], second_colour=palette[1], colour_mode="gradient")
-    elif palette:
-        st.update(accent="album", colour_mode="solid")
     else:
-        base = _COOL if mood in ("sad", "faith") else _WARM
-        st.update(accent="custom", custom_colour=rnd.choice(base), colour_mode="solid")
-    if mood == "sad" and st["colour_mode"] == "solid" and st["accent"] != "custom":
-        st.update(accent="custom", custom_colour=rnd.choice(_COOL))
-    if dark_cover and not st["outline"]:
-        st["glow"] = True
+        st.update(accent="custom", custom_colour=cols[0], second_colour=cols[1], third_colour=cols[2],
+                  colour_mode="gradient")
+    st["outline_colour"] = outline
 
-    summary = {"family": family, "mood": mood, "cover": bool(palette),
-               "energy": "high" if energy > 0.6 else "low" if energy < 0.3 else "mid"}
+    # ajustes finos pela música
+    if st["idle"] == "shake":
+        st["idle_strength"] = round(min(0.9, st["idle_strength"] * (0.7 + energy * 0.6)), 2)
+    if elevel == "high" and not st["party"] and recipe["name"] in ("neon", "street", "sunset", "comic"):
+        st["party"] = rnd.random() < 0.5
+    if mood == "sad":
+        st["party"] = False
+
+    summary = {"family": family, "mood": mood, "cover": bool(palette), "energy": elevel,
+               "look": recipe["name"]}
     return st, summary

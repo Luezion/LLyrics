@@ -4,6 +4,20 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.7.1
+
+### English
+- Much prettier generated styles: "Style for this song" now picks from 14 complete, hand-designed looks (pixel stack, neon, arena rock, velvet, love letter, rain, arcade, sunset and more) that match the song, then paints them with harmonious colours from the album cover
+- Outlines use a dark shade of the song's colour instead of plain black
+
+### Español
+- Estilos generados mucho más bonitos: "Estilo para esta canción" ahora elige entre 14 looks completos diseñados a mano (pila pixelada, neón, rock de estadio, terciopelo, carta de amor, lluvia, arcade, atardecer y más) según la canción, y los pinta con colores en armonía con la portada
+- Los contornos usan un tono oscuro del color de la canción en vez de negro
+
+### Português
+- Estilos gerados bem mais bonitos: o "Estilo para esta música" agora escolhe entre 14 visuais completos desenhados à mão (pilha pixelada, neon, rock de estádio, veludo, carta de amor, chuva, fliperama, pôr do sol e outros) de acordo com a música, e pinta com cores em harmonia com a capa
+- Os contornos usam um tom escuro da cor da música em vez de preto
+
 ## 1.7.0
 
 ### English
