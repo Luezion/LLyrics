@@ -534,6 +534,24 @@ class SettingsWindow(QWidget):
         v.addStretch(1)
 
         v = self._page("◐", tr("page.style"), tr("page.style.sub"))
+        cv = self._card(v, tr("card.autostyle"))
+        cap = QLabel(tr("autostyle.caption"))
+        cap.setObjectName("caption")
+        cap.setWordWrap(True)
+        cv.addWidget(cap)
+        row = QHBoxLayout()
+        self.autostyle_msg = QLabel("")
+        self.autostyle_msg.setObjectName("caption")
+        self.autostyle_msg.setWordWrap(True)
+        row.addWidget(self.autostyle_msg, 1)
+        gen = QPushButton(tr("btn.autostyle"))
+        gen.setObjectName("primary")
+        gen.setCursor(Qt.PointingHandCursor)
+        gen.clicked.connect(self._generate_style)
+        row.addWidget(gen)
+        cv.addLayout(row)
+        cv.addWidget(self._row("auto_style", "bool"))
+
         cv = self._card(v, tr("card.presets"))
         grid = QGridLayout()
         grid.setSpacing(8)
@@ -788,9 +806,23 @@ class SettingsWindow(QWidget):
             self._gallery_loaded = True
             self._load_gallery()
 
+    def _generate_style(self):
+        if self.ctl.generate_style(permanent=True):
+            self.autostyle_msg.setText(tr("autostyle.working"))
+        else:
+            self.autostyle_msg.setText(tr("autostyle.need_song"))
+
+    def style_generated(self, summary, permanent):
+        if summary is None:
+            self.autostyle_msg.setText(tr("autostyle.need_song"))
+        elif permanent:
+            self.autostyle_msg.setText(tr("autostyle.done", summary=i18n.style_summary(summary)))
+        else:
+            self.autostyle_msg.setText(tr("autostyle.auto_done", summary=i18n.style_summary(summary)))
+
     # ------------------------------------------------------------ comunidade
     def _copy_style_code(self):
-        QGuiApplication.clipboard().setText(lookcode.encode(lookcode.style_of(self.cfg)))
+        QGuiApplication.clipboard().setText(lookcode.encode(lookcode.style_of(self.ctl.view)))
         self.share_msg.setText(tr("share.copied"))
 
     def _publish_style(self):
@@ -802,7 +834,7 @@ class SettingsWindow(QWidget):
         author = self.share_author.text().strip()
         self.cfg["share_author"] = author
         self.cfg.save()
-        code = lookcode.encode(lookcode.style_of(self.cfg))
+        code = lookcode.encode(lookcode.style_of(self.ctl.view))
         QDesktopServices.openUrl(QUrl(community.submit_url(name, author, self.share_desc.text().strip(), code)))
         self.share_msg.setText(tr("share.opened"))
 
@@ -962,6 +994,12 @@ class SettingsWindow(QWidget):
             if getattr(self.ctl, "language_changed", None):
                 self.ctl.language_changed()
             return
+        if key == "auto_style":
+            if value and self.ctl.snap is not None:
+                self.ctl.generate_style(permanent=False)
+                self.autostyle_msg.setText(tr("autostyle.working"))
+            elif not value:
+                self.ctl.style_override = {}
         if key == "settings_preview" and self.isVisible():
             self.ctl.demo = bool(value)
         if key == "autostart":

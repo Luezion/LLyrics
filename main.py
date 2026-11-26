@@ -96,8 +96,10 @@ def main():
     act_settings = QAction()
     act_settings.triggered.connect(lambda: open_settings())
     act_update = QAction()
+    act_autostyle = QAction()
+    act_autostyle.triggered.connect(lambda: ctl.generate_style(permanent=True))
     act_quit = QAction()
-    for a in (act_toggle, act_move, act_settings, act_update):
+    for a in (act_toggle, act_move, act_settings, act_autostyle, act_update):
         menu.addAction(a)
     menu.addSeparator()
     menu.addAction(act_quit)
@@ -110,6 +112,7 @@ def main():
         act_move.setText(f"{tr('tray.move')}  ({cfg['hotkey_move']})")
         act_settings.setText(f"{tr('tray.settings')}  ({cfg['hotkey_settings']})")
         act_update.setText(tr("tray.update"))
+        act_autostyle.setText(tr("tray.autostyle"))
         act_quit.setText(tr("tray.quit"))
 
     update_texts()
@@ -149,6 +152,17 @@ def main():
         return failed
 
     ctl.register_hotkeys = register_hotkeys
+
+    def style_generated(summary, permanent):
+        win = state["settings"]
+        if win is not None:
+            win.style_generated(summary, permanent)
+        if summary is None:
+            notify(tr("autostyle.need_song"), 3000)
+        elif permanent and (win is None or not win.isVisible()):
+            notify(tr("autostyle.done", summary=i18n.style_summary(summary)), 4000)
+
+    ctl.on_style_generated = style_generated
     ctl.suspend_hotkeys = hk.unregister_all
     failed = register_hotkeys()
     if failed and sys.platform == "win32":

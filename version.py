@@ -1,5 +1,5 @@
 """LLyrics version. Changing this number on GitHub builds a new .exe and notifies everyone who has the app."""
-__version__ = "1.5.1"
+__version__ = "1.6.0"
 
 # Repositório de onde vêm as atualizações
 UPDATE_REPO = "Luezion/LLyrics"

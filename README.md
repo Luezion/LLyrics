@@ -35,6 +35,7 @@ When a new version comes out, the app shows a window to update with one click.
 - Album cover colour, palettes, rainbow, custom colour, **2 or 3 colour gradients**, flowing rainbow
 - Idle motion (shake, wave, bounce, pulse, float, sway), sparkles and party mode
 - Outline, shadow, glow and background; 12 free fonts (Google Fonts)
+- **Style for this song**: a look generated from the song's rhythm, lyrics, the artist's genre ([MusicBrainz](https://musicbrainz.org)) and the cover colours, once or on every song
 - Ready-made styles, including "Shake" and "Void Echoes", and importing looks from the mod's community site with a `STL-XXXXXX` code
 
 ### Position
@@ -97,6 +98,7 @@ All the app's text lives in `i18n.py`. To add a language, copy the English colum
 | `i18n.py` | Translations (English, Español, Português) |
 | `hotkeys.py` | Configurable global shortcuts |
 | `looks.py` | Imports looks from the mod's site |
+| `autostyle.py` | Generates a style for the song that's playing |
 | `community.py` | Community gallery and sharing |
 | `lookcode.py` | Style codes (`LLY1-…`) |
 | `updater.py` | Checks for a new version and updates the app |

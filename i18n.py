@@ -313,6 +313,47 @@ S = {
     "import.bad_llyrics": ("This LLyrics code is broken or incomplete.", "Este código de LLyrics está roto o incompleto.",
                            "Esse código do LLyrics está quebrado ou incompleto."),
 
+
+    # ------------------------------------------------------------------ estilo automático
+    "card.autostyle": ("Style for this song", "Estilo para esta canción", "Estilo para esta música"),
+    "autostyle.caption": ("Creates a look for the song that's playing, from its rhythm, its lyrics, the artist's "
+                          "genre and the album cover colours.",
+                          "Crea un look para la canción que suena, a partir de su ritmo, su letra, el género del "
+                          "artista y los colores de la portada.",
+                          "Cria um visual para a música que está tocando, a partir do ritmo, da letra, do gênero "
+                          "do artista e das cores da capa."),
+    "btn.autostyle": ("Generate style for this song", "Generar estilo para esta canción",
+                      "Gerar estilo para esta música"),
+    "tray.autostyle": ("Generate style for this song", "Generar estilo para esta canción",
+                       "Gerar estilo para esta música"),
+    "opt.auto_style": ("New style on every song", "Estilo nuevo en cada canción", "Estilo novo a cada música"),
+    "cap.auto_style": ("Your own style comes back when you turn this off.",
+                       "Tu estilo vuelve cuando lo desactivas.",
+                       "O seu estilo volta quando você desliga."),
+    "autostyle.need_song": ("Play a song first.", "Primero pon una canción.", "Toque uma música primeiro."),
+    "autostyle.working": ("Listening to the song…", "Escuchando la canción…", "Ouvindo a música…"),
+    "autostyle.done": ("✓ Style created: {summary}", "✓ Estilo creado: {summary}", "✓ Estilo criado: {summary}"),
+    "autostyle.auto_done": ("Style for this song: {summary}", "Estilo para esta canción: {summary}",
+                            "Estilo desta música: {summary}"),
+    "fam.rock": ("rock", "rock", "rock"),
+    "fam.rap": ("rap / hip-hop", "rap / hip-hop", "rap / hip-hop"),
+    "fam.electronic": ("electronic", "electrónica", "eletrônica"),
+    "fam.latin": ("latin", "latina", "latina"),
+    "fam.brazil": ("Brazilian", "brasileña", "brasileira"),
+    "fam.rnb": ("R&B / soul", "R&B / soul", "R&B / soul"),
+    "fam.acoustic": ("acoustic / folk", "acústica / folk", "acústica / folk"),
+    "fam.classic": ("jazz / classical", "jazz / clásica", "jazz / clássica"),
+    "fam.pop": ("pop", "pop", "pop"),
+    "mood.love": ("romantic lyrics", "letra romántica", "letra romântica"),
+    "mood.sad": ("sad lyrics", "letra triste", "letra triste"),
+    "mood.party": ("party lyrics", "letra de fiesta", "letra de festa"),
+    "mood.heavy": ("intense lyrics", "letra intensa", "letra intensa"),
+    "mood.faith": ("hopeful lyrics", "letra de esperanza", "letra de esperança"),
+    "energy.high": ("fast", "rápida", "agitada"),
+    "energy.mid": ("medium pace", "ritmo medio", "ritmo médio"),
+    "energy.low": ("slow", "lenta", "lenta"),
+    "colours.cover": ("cover colours", "colores de la portada", "cores da capa"),
+
     # ------------------------------------------------------------------ escolhas
     "accent.album": ("Album (cover colour)", "Álbum (color de la portada)", "Álbum (cor da capa)"),
     "accent.cream": ("Cream", "Crema", "Creme"),
@@ -445,3 +486,18 @@ def tr(_k, **kw):
 def choices(items):
     """[(valor, chave_de_tradução)] -> [(valor, texto no idioma atual)]"""
     return [(v, tr(k) if k in S else k) for v, k in items]
+
+
+def style_summary(summary):
+    """Texto curto explicando o estilo gerado: 'rock · agitada · letra romântica · cores da capa'."""
+    if not summary:
+        return ""
+    parts = []
+    if summary.get("family"):
+        parts.append(tr(f"fam.{summary['family']}"))
+    parts.append(tr(f"energy.{summary.get('energy', 'mid')}"))
+    if summary.get("mood"):
+        parts.append(tr(f"mood.{summary['mood']}"))
+    if summary.get("cover"):
+        parts.append(tr("colours.cover"))
+    return " · ".join(parts)

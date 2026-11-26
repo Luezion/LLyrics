@@ -111,6 +111,7 @@ DEFAULTS = {
     "sparkle_amount": 1.0,
     "party": False,
     "party_effects": "both",
+    "auto_style": False,          # estilo automático a cada música
     # Estilo do texto
     "accent": "album",
     "colour_mode": "solid",

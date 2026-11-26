@@ -89,9 +89,9 @@ class LyricsWindow(_Base):
         lines, wins, t = c.current_lyrics()
         if lines:
             rnd = self.random_mode
-            render.draw_lyrics(p, self.width(), self.height(), c.cfg, lines, wins, t, c.album_color,
+            render.draw_lyrics(p, self.width(), self.height(), c.view, lines, wins, t, c.album_color,
                                now=time.monotonic(), only_parity=self.parity if rnd else None,
-                               stack_box=render.stack_box_for(c.cfg) if rnd else None)
+                               stack_box=render.stack_box_for(c.view) if rnd else None)
         p.end()
 
 
@@ -105,7 +105,7 @@ class WidgetWindow(_Base):
         p.setCompositionMode(QPainter.CompositionMode_Source)
         p.fillRect(self.rect(), Qt.transparent)
         p.setCompositionMode(QPainter.CompositionMode_SourceOver)
-        render.draw_widget(p, self.ctl.cfg, self.ctl.widget_info(), self.ctl.album_color)
+        render.draw_widget(p, self.ctl.view, self.ctl.widget_info(), self.ctl.album_color)
         self.paint_edit_frame(p, "")
         p.end()
 
@@ -113,10 +113,16 @@ class WidgetWindow(_Base):
 class Controller(QObject):
     media_signal = Signal(object)
     lyrics_signal = Signal(str, object, str)
+    style_signal = Signal(str, object, object, bool)
 
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
+        self.view = dict(cfg)          # cfg + estilo automático da música (quando ligado)
+        self.style_override = {}
+        self.style_summary = None
+        self.cover_bytes = None
+        self.on_style_generated = None  # callback(resumo, permanente) para avisos
         self.snap = None
         self.track_id = None
         self.lines, self.windows = [], []
@@ -147,6 +153,7 @@ class Controller(QObject):
         self.widget_win.moved.connect(self._widget_moved)
         self.media_signal.connect(self._on_media)
         self.lyrics_signal.connect(self._on_lyrics)
+        self.style_signal.connect(self._on_style)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._tick)
@@ -216,10 +223,14 @@ class Controller(QObject):
             self.lines, self.windows = [], []
             self.cover = render.cover_pixmap(snap.thumb)
             self.album_color = render.album_accent(snap.thumb)
+            self.cover_bytes = snap.thumb
+            self.style_override = {}
+            self.style_summary = None
             self._fetch(snap)
         elif snap.thumb is not None and self.cover is None:
             self.cover = render.cover_pixmap(snap.thumb)
             self.album_color = render.album_accent(snap.thumb)
+            self.cover_bytes = snap.thumb
         if self._retry_at and now > self._retry_at:
             self._retry_at = None
             self._fetch(snap)
@@ -251,10 +262,53 @@ class Controller(QObject):
             self.lines, self.windows = [], []
         else:
             self.lines = lines
-            self.windows = render.line_windows(lines, self.cfg)
+            self.windows = render.line_windows(lines, self.view)
         self.status = msg
         if self.lines and self.duration <= 0:
             self.status = "status.no_time"
+        if lines is not None and self.cfg.get("auto_style"):
+            self.generate_style(permanent=False)
+
+    # ------------------------------------------------------------ estilo da música
+    def generate_style(self, permanent=True):
+        """Cria um estilo para a música atual. permanent=True grava como o estilo do usuário."""
+        if self.snap is None or not self.snap.title:
+            if self.on_style_generated:
+                self.on_style_generated(None, permanent)
+            return False
+        import autostyle
+        tid, title, artist = self.track_id, self.snap.title, self.snap.artist
+        lines, cover = list(self.lines), self.cover_bytes
+
+        def work():
+            try:
+                fam = autostyle.artist_family(artist)
+            except Exception:  # noqa: BLE001
+                fam = None
+            try:
+                style, summary = autostyle.generate(title, artist, lines, cover, fam)
+            except Exception as e:  # noqa: BLE001
+                print("[autostyle]", repr(e))
+                return
+            self.style_signal.emit(tid, style, summary, permanent)
+
+        threading.Thread(target=work, daemon=True).start()
+        return True
+
+    def _on_style(self, tid, style, summary, permanent):
+        if tid != self.track_id:
+            return
+        self.style_summary = summary
+        if permanent:
+            self.cfg.update(style)
+            self.cfg.save()
+            self.style_override = {}
+            self.config_changed_externally()
+        else:
+            self.style_override = style
+        self.apply_config()
+        if self.on_style_generated:
+            self.on_style_generated(summary, permanent)
 
     # ------------------------------------------------------------ janelas
     def screen(self):
@@ -263,7 +317,10 @@ class Controller(QObject):
         return screens[i] if 0 <= i < len(screens) else QGuiApplication.primaryScreen()
 
     def apply_config(self):
-        cfg = self.cfg
+        self.view = dict(self.cfg)
+        if self.cfg.get("auto_style") and self.style_override:
+            self.view.update(self.style_override)
+        cfg = self.view
         if self.lines:
             self.windows = render.line_windows(self.lines, cfg)
         self._demo_lines = lyr.parse_lrc(demo_lrc())
@@ -328,7 +385,7 @@ class Controller(QObject):
         key = (self.track_id, index, text)
         if key in self._rand_geo:
             return self._rand_geo[key]
-        cfg = self.cfg
+        cfg = self.view
         geo = self.screen().geometry()
         ww, wh = render.content_size(cfg, text, index)
         ww, wh = int(min(ww, geo.width())), int(min(wh, geo.height()))
@@ -362,7 +419,7 @@ class Controller(QObject):
         lines, _wins, t = self.current_lyrics()
         if not lines:
             return
-        f = render.compute_frame(lines, _wins, t, self.cfg, self.cfg.get("layout") == "stack")
+        f = render.compute_frame(lines, _wins, t, self.view, self.view.get("layout") == "stack")
         k = f.idx
         for win in (self.lyrics_win, self.lyrics_win2):
             p = win.parity

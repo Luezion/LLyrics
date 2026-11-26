@@ -4,6 +4,20 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.6.0
+
+### English
+- New **Style for this song**: LLyrics creates a look for the song that's playing, from its rhythm, its lyrics, the artist's genre and the album cover colours (Settings > Style, or the ♪ tray menu)
+- Optional "New style on every song": the look changes by itself with each song; turn it off to get your own style back
+
+### Español
+- Nuevo **Estilo para esta canción**: LLyrics crea un look para la canción que suena, a partir de su ritmo, su letra, el género del artista y los colores de la portada (Ajustes > Estilo, o el menú ♪ de la bandeja)
+- Opción "Estilo nuevo en cada canción": el look cambia solo con cada canción; al desactivarla vuelve tu estilo
+
+### Português
+- Novo **Estilo para esta música**: o LLyrics cria um visual para a música que está tocando, a partir do ritmo, da letra, do gênero do artista e das cores da capa (Configurações > Estilo, ou o menu ♪ da bandeja)
+- Opção "Estilo novo a cada música": o visual muda sozinho a cada música; ao desligar, o seu estilo volta
+
 ## 1.5.1
 
 ### English
