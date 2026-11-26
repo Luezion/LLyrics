@@ -296,7 +296,8 @@ class Controller(QObject):
             self.lyrics_win.setGeometry(x, y, lw, lh)
 
         s = float(cfg["widget_scale"])
-        ww, wh = int(360 * s + 2), int(96 * s + 2)
+        ww, wh = render.widget_size(cfg)
+        ww, wh = int(ww + 2), int(wh + 2)
         m = 24
         pos = cfg["widget_position"]
         if pos == "top_left":

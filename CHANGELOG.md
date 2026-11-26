@@ -4,6 +4,23 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.5.0
+
+### English
+- New "Sticker" widget layout, like Instagram's music sticker: just a big cover or spinning record with the song name below, no background (Settings > Widget > Widget layout)
+- Glossier vinyl record with light reflections, like Instagram's
+- Animated sound bars on the cover while the song plays
+
+### Español
+- Nuevo diseño "Sticker" para el widget, como el sticker de música de Instagram: solo una portada grande o un disco girando con el nombre de la canción debajo, sin fondo (Ajustes > Widget > Diseño del widget)
+- Disco de vinilo más brillante, con reflejos de luz como en Instagram
+- Barritas de sonido animadas en la portada mientras suena la canción
+
+### Português
+- Novo layout "Figurinha" para o widget, como a figurinha de música do Instagram: só a capa grande ou o disco girando com o nome da música embaixo, sem fundo (Configurações > Widget > Layout do widget)
+- Disco de vinil mais brilhante, com reflexos de luz como no Instagram
+- Barrinhas de som animadas na capa enquanto a música toca
+
 ## 1.4.0
 
 ### English

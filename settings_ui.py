@@ -17,7 +17,7 @@ import i18n
 import lookcode
 import looks
 import render
-from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, COVER_STYLES, EXITS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
+from config import (ACCENT_CHOICES, ANIMATIONS, COLOUR_MODES, COVER_STYLES, EXITS, WIDGET_LAYOUTS, FONTS, HOTKEY_DEFAULTS, IDLES, LAYOUTS,
                     PARTY_EFFECTS, POSITION_MODES, WIDGET_POSITIONS)
 from i18n import tr
 from version import UPDATE_REPO, __version__
@@ -657,8 +657,10 @@ class SettingsWindow(QWidget):
 
         v = self._page("▣", tr("page.widget"), tr("page.widget.sub"))
         self._card(v, tr("card.widget"), [
-            ("widget_position", ("choice", C(WIDGET_POSITIONS))),
+            ("widget_layout", ("choice", C(WIDGET_LAYOUTS))),
             ("cover_style", ("choice", C(COVER_STYLES))),
+            ("widget_progress", "bool"),
+            ("widget_position", ("choice", C(WIDGET_POSITIONS))),
             ("widget_scale", ("slider", 0.6, 2.0, 0.05, "x")),
             ("widget_opacity", ("slider", 0.2, 1.0, 0.05, "")),
         ])
@@ -917,6 +919,7 @@ class SettingsWindow(QWidget):
             "third_colour": c["colour_mode"] == "gradient3",
             "outline_colour": c["outline"],
             "outline_thickness": c["outline"],
+            "widget_progress": c.get("widget_layout") == "sticker",
         }
         for key, show in rules.items():
             if key in self.rows:

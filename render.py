@@ -2,7 +2,8 @@
 import math
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import (QBrush, QColor, QFont, QFontDatabase, QFontMetricsF, QImage,
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QFont, QFontDatabase, QFontMetricsF, QImage,
+                           QRadialGradient,
                            QLinearGradient, QPainter, QPainterPath, QPen, QPixmap, QTransform)
 
 from config import ACCENTS, FONTS, RAINBOW, resource_path
@@ -943,50 +944,134 @@ def draw_cover(p, rect, style, info, accent, op, s=1.0):
     # ---- disco de vinil
     c = rect.center()
     r = rect.width() / 2
+    lr = r * 0.56
     p.setPen(Qt.NoPen)
-    p.setBrush(QColor(0, 0, 0, int(90 * op)))
-    p.drawEllipse(c + QPointF(1.5 * s, 2 * s), r, r)  # sombra
+    p.setBrush(QColor(0, 0, 0, int(110 * op)))
+    p.drawEllipse(c + QPointF(0, 3 * s), r, r)  # sombra
+    base = QRadialGradient(c, r)
+    base.setColorAt(0.0, QColor(40, 36, 36, int(255 * op)))
+    base.setColorAt(0.7, QColor(26, 23, 23, int(255 * op)))
+    base.setColorAt(1.0, QColor(12, 11, 11, int(255 * op)))
+    p.setBrush(base)
+    p.drawEllipse(c, r, r)
+    # sulcos finos (não precisam girar: são círculos)
+    p.setBrush(Qt.NoBrush)
+    n = 28
+    for k in range(n):
+        rr = lr + (r * 0.97 - lr) * (k + 0.5) / n
+        a_ = 16 if k % 3 == 0 else 8
+        p.setPen(QPen(QColor(255, 255, 255, int(a_ * op)), max(0.5, 0.6 * s)))
+        p.drawEllipse(c, rr, rr)
+    p.setPen(QPen(QColor(255, 255, 255, int(30 * op)), max(0.8, 1.0 * s)))
+    p.drawEllipse(c, r * 0.985, r * 0.985)
+    # reflexo de luz no vinil (parado, como no Instagram)
+    ring = QPainterPath()
+    ring.addEllipse(c, r, r)
+    inner = QPainterPath()
+    inner.addEllipse(c, lr, lr)
+    ring = ring.subtracted(inner)
+    sheen = QConicalGradient(c, 0)
+    for pos, alpha in ((0.0, 0), (0.08, 70), (0.16, 0), (0.42, 0), (0.5, 55), (0.58, 0),
+                       (0.62, 0), (0.7, 35), (0.78, 0), (1.0, 0)):
+        sheen.setColorAt(pos, QColor(255, 255, 255, int(alpha * op)))
+    p.save()
+    p.setClipPath(ring)
+    p.fillRect(rect, sheen)
+    p.restore()
+    # rótulo com a capa (este gira)
+    p.save()
     p.translate(c)
     p.rotate(info.disc_angle)
     p.translate(-c)
-    p.setBrush(QColor(14, 14, 16, int(255 * op)))
-    p.drawEllipse(c, r, r)
-    # sulcos
-    for k in range(9):
-        rr = r * (0.94 - k * 0.045)
-        p.setPen(QPen(QColor(255, 255, 255, int((10 if k % 2 else 18) * op)), max(0.6, 0.7 * s)))
-        p.setBrush(Qt.NoBrush)
-        p.drawEllipse(c, rr, rr)
-    # rótulo do disco com a capa
-    lr = r * 0.58
     label = QRectF(c.x() - lr, c.y() - lr, lr * 2, lr * 2)
     lab_clip = QPainterPath()
     lab_clip.addEllipse(label)
-    p.save()
     p.setClipPath(lab_clip)
     _cover_art(p, label, info, accent, op)
     p.restore()
-    p.setPen(QPen(QColor(0, 0, 0, int(120 * op)), max(1.0, 1.2 * s)))
+    p.setPen(QPen(QColor(0, 0, 0, int(140 * op)), max(1.0, 1.4 * s)))
     p.setBrush(Qt.NoBrush)
     p.drawEllipse(c, lr, lr)
-    # furo do meio
     p.setPen(Qt.NoPen)
-    p.setBrush(QColor(20, 20, 24, int(255 * op)))
-    p.drawEllipse(c, r * 0.07, r * 0.07)
+    p.setBrush(QColor(12, 12, 14, int(255 * op)))
+    p.drawEllipse(c, r * 0.05, r * 0.05)  # furo do meio
     p.restore()
-    # brilho do vinil (não gira, como a luz refletindo)
-    p.save()
-    clip2 = QPainterPath()
-    clip2.addEllipse(rect)
-    p.setClipPath(clip2)
-    sheen = QLinearGradient(rect.topLeft(), rect.bottomRight())
-    sheen.setColorAt(0.0, QColor(255, 255, 255, 0))
-    sheen.setColorAt(0.42, QColor(255, 255, 255, int(28 * op)))
-    sheen.setColorAt(0.5, QColor(255, 255, 255, 0))
-    sheen.setColorAt(0.62, QColor(255, 255, 255, int(16 * op)))
-    sheen.setColorAt(1.0, QColor(255, 255, 255, 0))
-    p.fillRect(rect, sheen)
-    p.restore()
+
+
+def widget_size(cfg):
+    s = float(cfg["widget_scale"])
+    if cfg.get("widget_layout") == "sticker":
+        h = 150 + 62 + (12 if cfg.get("widget_progress", True) else 0)
+        return 250 * s, h * s
+    return 360 * s, 96 * s
+
+
+def _eq_icon(p, x, y, s, t, op):
+    """Barrinhas de som animadas (como no adesivo do Instagram)."""
+    w = 3.2 * s
+    for k in range(3):
+        hgt = (0.45 + 0.55 * abs(math.sin(t * 0.05 + k * 1.3))) * 13 * s
+        p.setBrush(QColor(255, 255, 255, int(235 * op)))
+        p.setPen(Qt.NoPen)
+        p.drawRoundedRect(QRectF(x + k * (w + 2.4 * s), y - hgt, w, hgt), w / 2, w / 2)
+
+
+def _shadow_text(p, rect, flags, text, color, op, s):
+    p.setPen(QColor(0, 0, 0, int(150 * op)))
+    p.drawText(rect.translated(0, 1.5 * s), flags, text)
+    p.setPen(color)
+    p.drawText(rect, flags, text)
+
+
+def draw_sticker(p, cfg, info, album_color):
+    """Widget sem fundo, estilo figurinha de música do Instagram: capa grande e o nome embaixo."""
+    s = float(cfg["widget_scale"])
+    W, H = widget_size(cfg)
+    op = float(cfg["widget_opacity"])
+    p.setRenderHint(QPainter.Antialiasing, True)
+    p.setRenderHint(QPainter.TextAntialiasing, True)
+    p.setRenderHint(QPainter.SmoothPixmapTransform, True)
+    accent = accent_for(cfg, album_color, 0)
+    style = cfg.get("cover_style", "rounded")
+    cs = 150 * s
+    crect = QRectF((W - cs) / 2, 6 * s, cs, cs)
+    if style not in ("circle", "vinyl"):
+        for k in range(6):  # sombra suave embaixo da capa
+            g = (k + 1) * 2.2 * s
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor(0, 0, 0, int(14 * op)))
+            p.drawRoundedRect(crect.adjusted(-g / 2, g / 2, g / 2, g), 12 * s, 12 * s)
+    draw_cover(p, crect, style, info, accent, op, s * 1.4)
+    if style in ("rounded", "square") and info.cover is not None and info.playing:
+        _eq_icon(p, crect.left() + 12 * s, crect.bottom() - 12 * s, s, info.disc_angle, op)
+
+    tf = QFont(family("poppins"))
+    tf.setPixelSize(int(15 * s))
+    tf.setBold(True)
+    af = QFont(family("poppins"))
+    af.setPixelSize(int(13 * s))
+    y = crect.bottom() + 10 * s
+    p.setFont(tf)
+    title = QFontMetricsF(tf).elidedText(info.title or tr("widget.nothing"), Qt.ElideRight, W - 16 * s)
+    _shadow_text(p, QRectF(0, y, W, 20 * s), Qt.AlignHCenter | Qt.AlignTop, title,
+                 QColor(255, 255, 255, int(250 * op)), op, s)
+    p.setFont(af)
+    sub = info.status or info.artist or tr("widget.open_player")
+    if not info.playing and info.title and not info.status:
+        sub = f"{info.artist}  ·  {tr('widget.paused')}" if info.artist else tr("widget.paused")
+    sub = QFontMetricsF(af).elidedText(sub, Qt.ElideRight, W - 16 * s)
+    _shadow_text(p, QRectF(0, y + 21 * s, W, 18 * s), Qt.AlignHCenter | Qt.AlignTop, sub,
+                 with_alpha(accent, op) if info.status else QColor(255, 255, 255, int(215 * op)), op, s)
+    if cfg.get("widget_progress", True) and info.duration > 0:
+        bw = W * 0.6
+        bar = QRectF((W - bw) / 2, y + 46 * s, bw, 3 * s)
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor(255, 255, 255, int(60 * op)))
+        p.drawRoundedRect(bar, 1.5 * s, 1.5 * s)
+        frac = clamp(info.position / info.duration)
+        p.setBrush(with_alpha(accent, op))
+        p.drawRoundedRect(QRectF(bar.x(), bar.y(), max(bar.height(), bw * frac), bar.height()), 1.5 * s, 1.5 * s)
+    return W, H
 
 
 class WidgetInfo:
@@ -1002,6 +1087,8 @@ class WidgetInfo:
 
 
 def draw_widget(p, cfg, info, album_color):
+    if cfg.get("widget_layout") == "sticker":
+        return draw_sticker(p, cfg, info, album_color)
     s = float(cfg["widget_scale"])
     W, H = 360 * s, 96 * s
     op = float(cfg["widget_opacity"])
