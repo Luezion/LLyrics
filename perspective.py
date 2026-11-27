@@ -92,7 +92,11 @@ class PerspectiveManager(QObject):
             hb *= max_len / length
             length = max_len
         x_far = x_near - length if side == "right" else x_near + length
-        yc = geo.height() * (float(cfg.get("persp_height", 0.5)) + (rnd.random() - 0.5) * 0.08)
+        if cfg.get("position_mode") == "random":
+            # aleatória: cada linha numa altura diferente (sempre na esquerda/direita)
+            yc = H * (0.16 + rnd.random() * 0.58)
+        else:
+            yc = H * (float(cfg.get("persp_height", 0.5)) + (rnd.random() - 0.5) * 0.08)
         yc = min(max(yc, H * 0.12 + hb / 2), H * 0.78 - hb / 2)
         # a ponta de longe encolhe em direção a um ponto de fuga na altura do centro da tela
         vy = H * 0.46

@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.10.2
+
+### English
+- Side perspective now works with **Random position**: each line shows up at a different height (still on the left or right side)
+
+### Español
+- La perspectiva lateral ahora funciona con **Posición aleatoria**: cada línea aparece a una altura distinta (siempre a la izquierda o a la derecha)
+
+### Português
+- A perspectiva nas laterais agora funciona com **Posição aleatória**: cada linha aparece numa altura diferente (sempre na esquerda ou na direita)
+
 ## 1.10.1
 
 ### English

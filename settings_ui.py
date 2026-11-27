@@ -1168,7 +1168,7 @@ class SettingsWindow(QWidget):
             "outline_thickness": c["outline"],
             "widget_progress": c.get("widget_layout") == "sticker",
             "persp_strength": c["layout"] == "perspective",
-            "persp_height": c["layout"] == "perspective",
+            "persp_height": c["layout"] == "perspective" and c["position_mode"] != "random",
             "gen_motion_speed": c.get("gen_motion", 1.0) > 0.01,
             "gen_shake": c.get("gen_motion", 1.0) > 0.01,
         }
