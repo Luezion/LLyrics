@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.10.1
+
+### English
+- Side perspective: the text size setting now really changes the size (before it only made the text blurrier). The separate "Text height" slider was removed
+
+### Español
+- Perspectiva lateral: el tamaño del texto ahora cambia el tamaño de verdad (antes solo lo dejaba borroso). Se quitó el control aparte "Altura del texto"
+
+### Português
+- Perspectiva nas laterais: o tamanho da letra agora muda o tamanho de verdade (antes só deixava a letra borrada). O controle separado "Altura da letra" foi removido
+
 ## 1.10.0
 
 ### English

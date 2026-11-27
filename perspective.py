@@ -81,7 +81,7 @@ class PerspectiveManager(QObject):
         strength = max(0.05, min(1.0, float(cfg.get("persp_strength", 0.6))))
         _, fw, fh = self._flat_cfg(text)
         aspect = fw / max(1, fh)
-        hb = H * float(cfg.get("persp_size", 0.15))            # altura perto da borda
+        hb = float(fh)   # ponta perto da borda em 1:1 → o tamanho da letra manda no tamanho, sem perder nitidez
         cz = float(cfg.get("center_zone", 0.35)) if not cfg.get("allow_center", True) else 0.18
         x_near = W * 0.95 if side == "right" else W * 0.05
         x_lim = W * (0.5 + cz * 0.65) if side == "right" else W * (0.5 - cz * 0.65)

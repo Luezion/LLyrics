@@ -116,7 +116,6 @@ DEFAULTS = {
     "party": False,
     "party_effects": "both",
     "persp_strength": 0.6,
-    "persp_size": 0.15,
     "persp_height": 0.5,
     "auto_style": False,          # estilo automático a cada música
     # Preferências do gerador de estilos
