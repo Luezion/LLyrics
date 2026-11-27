@@ -86,71 +86,50 @@ ALBUM_GRADIENT = []   # cores da capa atual para o modo "Degradê da capa" (o Co
 _GRAD_FALLBACK = ["#FF9EC7", "#C4B3FF", "#8FC9F2"]
 
 
-def _neutral_palette(img):
-    """Capa sem cor forte (preto e branco, cinza, sépia): usa os próprios tons da capa,
-    do mais claro para o mais escuro, mantendo o leve tom (quente/frio) dela."""
-    px = []
-    for y in range(img.height()):
-        for x in range(img.width()):
-            c = img.pixelColor(x, y)
-            px.append((c.valueF(), c.redF(), c.greenF(), c.blueF()))
-    px.sort()
-    n = len(px)
-    out = []
-    for lo, hi, v in ((0.85, 1.0, 1.0), (0.55, 0.8, 0.86), (0.2, 0.5, 0.72)):
-        part = px[int(n * lo):max(int(n * lo) + 1, int(n * hi))]
-        r = sum(q[1] for q in part) / len(part)
-        g = sum(q[2] for q in part) / len(part)
-        b = sum(q[3] for q in part) / len(part)
-        c = QColor.fromRgbF(r, g, b)
-        h = c.hsvHueF() if c.hsvHueF() >= 0 else 0.0
-        out.append(QColor.fromHsvF(h, min(c.hsvSaturationF(), 0.22), v).name())
-    return out
-
-
 def album_palette(image_bytes):
-    """Até 3 cores marcantes e diferentes entre si tiradas da capa, clareadas para ler sobre o jogo."""
+    """As 3 cores que mais ocupam espaço na capa (sem dar preferência a cor forte), diferentes entre si,
+    da mais presente para a menos. Só são clareadas o necessário para dar para ler por cima do jogo."""
     if not image_bytes:
         return []
     img = QImage()
     if not img.loadFromData(image_bytes):
         return []
-    img = img.scaled(40, 40, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
-    nb = 24
-    bins = [[0.0, 0.0, 0.0, 0.0, 0.0] for _ in range(nb)]  # peso, r, g, b, posição x média
+    img = img.scaled(48, 48, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+    buckets = {}
     for y in range(img.height()):
         for x in range(img.width()):
             c = img.pixelColor(x, y)
-            h, sat, v = c.hsvHueF(), c.hsvSaturationF(), c.valueF()
-            if h < 0 or sat < 0.2 or v < 0.2:
-                continue
-            w = sat * sat * v
-            b = bins[int(h * nb) % nb]
-            b[0] += w
-            b[1] += c.redF() * w
-            b[2] += c.greenF() * w
-            b[3] += c.blueF() * w
-            b[4] += x * w
-    order = sorted(range(nb), key=lambda i: -bins[i][0])
-    picked = []
-    for i in order:
-        if bins[i][0] < 0.8 or len(picked) == 3:
-            break
-        if all(min(abs(i - j), nb - abs(i - j)) >= 3 for j in picked):   # ao menos ~45° de diferença
-            picked.append(i)
+            r, g, b = c.red(), c.green(), c.blue()
+            k = (r * 6 // 256, g * 6 // 256, b * 6 // 256)
+            e = buckets.setdefault(k, [0, 0, 0, 0])
+            e[0] += 1
+            e[1] += r
+            e[2] += g
+            e[3] += b
+    groups = sorted(([e[0], e[1] / e[0], e[2] / e[0], e[3] / e[0]] for e in buckets.values()), key=lambda e: -e[0])
+    # junta tons quase iguais num grupo só (senão o mesmo fundo vira 3 "cores")
+    merged = []
+    for e in groups:
+        for m in merged:
+            if ((m[1] - e[1]) ** 2 + (m[2] - e[2]) ** 2 + (m[3] - e[3]) ** 2) ** 0.5 < 70:
+                tot = m[0] + e[0]
+                m[1:] = [(m[i] * m[0] + e[i] * e[0]) / tot for i in (1, 2, 3)]
+                m[0] = tot
+                break
+        else:
+            merged.append(list(e))
+    merged.sort(key=lambda e: -e[0])
+    total = sum(e[0] for e in merged)
+    picked = [e for e in merged if e[0] >= total * 0.03][:3] or merged[:1]
     cols = []
-    for i in picked:
-        b = bins[i]
-        col = QColor.fromRgbF(b[1] / b[0], b[2] / b[0], b[3] / b[0])
-        cols.append((b[4] / b[0], QColor.fromHsvF(col.hsvHueF(), min(col.hsvSaturationF(), 0.62),
-                                                   max(col.valueF(), 0.95))))
-    if not cols:
-        return _neutral_palette(img)
-    cols.sort(key=lambda t: t[0])   # na ordem em que aparecem na capa (esquerda → direita)
-    cols = [c for _, c in cols]
-    if len(cols) == 1:   # capa de uma cor só: degradê do tom claro para um tom vizinho
-        h = cols[0].hsvHueF()
-        cols = [QColor.fromHsvF(h, 0.28, 1.0), cols[0], QColor.fromHsvF(h, 0.85, 0.92)]
+    for e in picked:
+        c = QColor.fromRgbF(e[1] / 255, e[2] / 255, e[3] / 255)
+        h = c.hsvHueF() if c.hsvHueF() >= 0 else 0.0
+        # clareia mantendo a ordem dos tons: preto vira cinza médio, branco continua branco
+        cols.append(QColor.fromHsvF(h, min(c.hsvSaturationF(), 0.8), 0.55 + 0.45 * c.valueF()))
+    if len(cols) == 1:   # capa de uma cor só: do tom claro para um tom mais fundo da mesma cor
+        h, sat = cols[0].hsvHueF() if cols[0].hsvHueF() >= 0 else 0.0, cols[0].hsvSaturationF()
+        cols = [QColor.fromHsvF(h, sat * 0.4, 1.0), cols[0], QColor.fromHsvF(h, min(1.0, sat * 1.3), 0.7)]
     return [c.name() for c in cols]
 
 

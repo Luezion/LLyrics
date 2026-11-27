@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.11.2
+
+### English
+- Gradient from the album cover now uses the 3 colours that take up the most space on the cover (from most to least), instead of favouring strong colours
+
+### Español
+- El degradado de la portada ahora usa los 3 colores que más espacio ocupan en la portada (del que más al que menos), en lugar de preferir colores fuertes
+
+### Português
+- O degradê da capa agora usa as 3 cores que mais ocupam espaço na capa (da que mais aparece pra que menos aparece), em vez de dar preferência a cores fortes
+
 ## 1.11.1
 
 ### English
