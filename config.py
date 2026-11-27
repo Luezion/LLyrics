@@ -68,7 +68,7 @@ FONTS = [
 ]
 
 LAYOUTS = [(k, f"layout.{k}") for k in ("lines", "stack", "words", "words_tilted", "arc", "snake", "spotlight",
-                                        "scatter", "poster", "punchline", "tilted")]
+                                        "scatter", "poster", "punchline", "tilted", "perspective")]
 EXITS = [(k, f"exit.{k}") for k in ("auto", "fade", "drift")]
 COLOUR_MODES = [(k, f"colour.{k}") for k in ("solid", "gradient", "gradient3", "rainbow_flow")]
 IDLES = [(k, f"idle.{k}") for k in ("none", "shake", "wave", "bounce", "pulse", "float", "sway")]
@@ -115,6 +115,9 @@ DEFAULTS = {
     "sparkle_amount": 1.0,
     "party": False,
     "party_effects": "both",
+    "persp_strength": 0.6,
+    "persp_size": 0.15,
+    "persp_height": 0.5,
     "auto_style": False,          # estilo automático a cada música
     # Preferências do gerador de estilos
     "gen_min_size": 26,
@@ -132,7 +135,7 @@ DEFAULTS = {
     "gen_karaoke": "auto",
     "gen_variety": 1.0,
     "gen_layouts": ["lines", "stack", "words", "words_tilted", "arc", "snake", "spotlight", "scatter", "poster",
-                    "punchline", "tilted"],
+                    "punchline", "tilted", "perspective"],
     "gen_fonts": ["pixelify", "bebas", "poppins", "montserrat", "righteous", "pacifico", "lobster", "playfair",
                   "eagle_lake", "comic_relief", "press_start"],
     # Estilo do texto

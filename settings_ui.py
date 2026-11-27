@@ -522,6 +522,9 @@ class SettingsWindow(QWidget):
         v = self._page("✦", tr("page.animation"), tr("page.animation.sub"))
         self._card(v, tr("card.layout"), [
             ("layout", ("choice", C(LAYOUTS))),
+            ("persp_strength", ("slider", 0.1, 1.0, 0.05, "")),
+            ("persp_size", ("slider", 0.06, 0.3, 0.01, "")),
+            ("persp_height", ("slider", 0.2, 0.7, 0.01, "")),
             ("animation", ("choice", C(ANIMATIONS))),
             ("exit_animation", ("choice", C(EXITS))),
             ("typewriter_sync", "bool"),
@@ -1165,6 +1168,9 @@ class SettingsWindow(QWidget):
             "outline_colour": c["outline"],
             "outline_thickness": c["outline"],
             "widget_progress": c.get("widget_layout") == "sticker",
+            "persp_strength": c["layout"] == "perspective",
+            "persp_size": c["layout"] == "perspective",
+            "persp_height": c["layout"] == "perspective",
             "gen_motion_speed": c.get("gen_motion", 1.0) > 0.01,
             "gen_shake": c.get("gen_motion", 1.0) > 0.01,
         }

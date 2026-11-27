@@ -30,7 +30,7 @@ When a new version comes out, the app shows a window to update with one click.
 
 - Entrances: typewriter (synced to the singing), drop, rise, words, fade, pop, wave
 - Exits: same as entrance, fade, blown away
-- 11 layouts: lines, **stack** (key words big, little words small), first word highlighted (with or without tilt), **arc**, **snake**, **spotlight** (one big word at a time), **scatter**, **poster**, **punchline** and **tilted**
+- 12 layouts: lines, **stack** (key words big, little words small), first word highlighted (with or without tilt), **arc**, **snake**, **spotlight** (one big word at a time), **scatter**, **poster**, **punchline**, **tilted** and **side perspective** (lines leaning on the left/right like side walls)
 - Karaoke, instrumental countdown, previous line and next line preview
 - Album cover colour, palettes, rainbow, custom colour, **2 or 3 colour gradients**, flowing rainbow
 - Idle motion (shake, wave, bounce, pulse, float, sway), sparkles and party mode
@@ -100,6 +100,7 @@ All the app's text lives in `i18n.py`. To add a language, copy the English colum
 | `hotkeys.py` | Configurable global shortcuts |
 | `looks.py` | Imports looks from the mod's site |
 | `autostyle.py` | Generates a style for the song that's playing |
+| `perspective.py` | Side perspective layout |
 | `mystyles.py` | Styles saved on the PC |
 | `community.py` | Community gallery and sharing |
 | `lookcode.py` | Style codes (`LLY1-…`) |

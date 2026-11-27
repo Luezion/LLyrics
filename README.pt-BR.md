@@ -18,7 +18,7 @@ Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra d
 
 - Animações de entrada: máquina de escrever (no ritmo do canto), queda, subida, palavras, esmaecer, pop, onda
 - Saídas: igual à entrada, esmaecer, levada pelo vento
-- 11 layouts: linhas, **pilha**, primeira palavra em destaque (com ou sem inclinação), **arco**, **serpente**, **holofote** (uma palavra grande por vez), **espalhado**, **pôster**, **punchline** e **inclinada**
+- 12 layouts: linhas, **pilha**, primeira palavra em destaque (com ou sem inclinação), **arco**, **serpente**, **holofote** (uma palavra grande por vez), **espalhado**, **pôster**, **punchline**, **inclinada** e **perspectiva nas laterais**
 - Karaokê, contagem nos trechos instrumentais, linha anterior e prévia da próxima
 - Cor da capa do álbum, paletas prontas, arco-íris, cor própria, **degradê de 2 ou 3 cores**, arco-íris correndo
 - Movimento parado (tremer, onda, pulinho, pulsar, flutuar, balançar), brilhinhos e modo festa
@@ -98,6 +98,7 @@ Todos os textos do app ficam em `i18n.py`. Para acrescentar um idioma, copie a c
 | `settings_ui.py` | Janela de configurações |
 | `looks.py` | Importa looks do site do mod |
 | `autostyle.py` | Gera um estilo para a música que está tocando |
+| `perspective.py` | Layout em perspectiva nas laterais |
 | `mystyles.py` | Estilos salvos no PC |
 | `community.py` | Galeria da comunidade e compartilhamento |
 | `lookcode.py` | Códigos de estilo (`LLY1-…`) |

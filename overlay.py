@@ -160,6 +160,7 @@ class Controller(QObject):
         self.top_timer = QTimer(self)
         self.top_timer.timeout.connect(self._keep_on_top)
         self.top_timer.start(2000)
+        self.persp = None   # layout "perspectiva nas laterais", criado quando usado
         self.apply_config()
 
     # ------------------------------------------------------------ estado
@@ -326,6 +327,12 @@ class Controller(QObject):
         if self.cfg.get("auto_style") and self.style_override:
             self.view.update(self.style_override)
         cfg = self.view
+        persp_on = cfg.get("layout") == "perspective"
+        if persp_on and self.persp is None:
+            from perspective import PerspectiveManager
+            self.persp = PerspectiveManager(self)
+        if self.persp is not None:
+            self.persp.set_active(persp_on)
         if self.lines:
             self.windows = render.line_windows(self.lines, cfg)
         self._demo_lines = lyr.parse_lrc(demo_lrc())
@@ -473,6 +480,8 @@ class Controller(QObject):
         paused_hide = has_track and cfg["hide_paused"] and not self.playing and not self.edit
         base = not self.hidden_by_user and not paused_hide
         show_l = base and cfg["show_lyrics"] and (has_track or self.demo or self.edit)
+        if self.view.get("layout") == "perspective" and not self.edit:
+            show_l = False  # nesse layout a letra vai nas janelas em perspectiva
         show_w = base and cfg["show_widget"] and (has_track or self.demo or self.edit)
         show_l2 = show_l and self.cfg["position_mode"] == "random" and not self.edit
         for win, show in ((self.lyrics_win, show_l), (self.lyrics_win2, show_l2), (self.widget_win, show_w)):
@@ -482,11 +491,19 @@ class Controller(QObject):
                 win.hide()
 
     def _keep_on_top(self):
-        for w in (self.lyrics_win, self.lyrics_win2, self.widget_win):
+        extra = self.persp.wins if self.persp is not None else []
+        for w in (self.lyrics_win, self.lyrics_win2, self.widget_win, *extra):
             if w.isVisible():
                 winutil.force_topmost(w)
 
     def _tick(self):
+        if self.persp is not None and self.persp.active:
+            if self.hidden_by_user or not self.cfg["show_lyrics"] or self.edit or (
+                    self.snap is not None and self.cfg["hide_paused"] and not self.playing):
+                for w in self.persp.wins:
+                    w.hide()
+            else:
+                self.persp.tick()
         now = time.monotonic()
         dt_ = min(0.2, now - self._last_tick)
         self._last_tick = now

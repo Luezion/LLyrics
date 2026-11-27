@@ -4,6 +4,20 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.10.0
+
+### English
+- New layout **Side perspective**: each line leans in 3D as if it were on a left or right wall, and the side changes in random runs (3 on the right, 2 on the left, 4 on the right…). Adjust the perspective strength, the text height and the position on screen
+- New generator look "side walls" using it
+
+### Español
+- Nuevo diseño **Perspectiva lateral**: cada línea se inclina en 3D como si estuviera en una pared izquierda o derecha, y el lado cambia en tandas aleatorias (3 a la derecha, 2 a la izquierda, 4 a la derecha…). Ajusta la fuerza de la perspectiva, la altura del texto y la posición en pantalla
+- Nuevo look del generador "side walls" que lo usa
+
+### Português
+- Novo layout **Perspectiva nas laterais**: cada linha inclina em 3D como se estivesse numa parede da esquerda ou da direita, e o lado muda em sequências aleatórias (3 na direita, 2 na esquerda, 4 na direita…). Dá para ajustar a intensidade da perspectiva, a altura da letra e a posição na tela
+- Novo visual do gerador "side walls" usando esse layout
+
 ## 1.9.0
 
 ### English

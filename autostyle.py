@@ -303,6 +303,10 @@ RECIPES = [
              font="righteous", layout="tilted", animation="typewriter", idle="bounce", idle_strength=0.3,
              idle_speed=0.7, outline=True, outline_thickness=1.6, uppercase=True, sparkle=True, text_size=48,
              letter_spacing=1)),
+    dict(name="side_walls", fam="rock rap electronic pop latin", mood="party heavy love", energy="mid high",
+         colour="vivid", dark=None, style=dict(
+             font="bebas", layout="perspective", animation="typewriter", idle="none", outline=True,
+             outline_thickness=1.3, glow=True, uppercase=True, karaoke=True, text_size=56, letter_spacing=1.5)),
     dict(name="chrome", fam="rock electronic rap", mood="heavy sad", energy="mid low", colour="ice",
          dark=True, style=dict(
              font="montserrat", layout="words", animation="drop", exit_animation="drift", idle="float",
