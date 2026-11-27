@@ -86,6 +86,28 @@ ALBUM_GRADIENT = []   # cores da capa atual para o modo "Degradê da capa" (o Co
 _GRAD_FALLBACK = ["#FF9EC7", "#C4B3FF", "#8FC9F2"]
 
 
+def _neutral_palette(img):
+    """Capa sem cor forte (preto e branco, cinza, sépia): usa os próprios tons da capa,
+    do mais claro para o mais escuro, mantendo o leve tom (quente/frio) dela."""
+    px = []
+    for y in range(img.height()):
+        for x in range(img.width()):
+            c = img.pixelColor(x, y)
+            px.append((c.valueF(), c.redF(), c.greenF(), c.blueF()))
+    px.sort()
+    n = len(px)
+    out = []
+    for lo, hi, v in ((0.85, 1.0, 1.0), (0.55, 0.8, 0.86), (0.2, 0.5, 0.72)):
+        part = px[int(n * lo):max(int(n * lo) + 1, int(n * hi))]
+        r = sum(q[1] for q in part) / len(part)
+        g = sum(q[2] for q in part) / len(part)
+        b = sum(q[3] for q in part) / len(part)
+        c = QColor.fromRgbF(r, g, b)
+        h = c.hsvHueF() if c.hsvHueF() >= 0 else 0.0
+        out.append(QColor.fromHsvF(h, min(c.hsvSaturationF(), 0.22), v).name())
+    return out
+
+
 def album_palette(image_bytes):
     """Até 3 cores marcantes e diferentes entre si tiradas da capa, clareadas para ler sobre o jogo."""
     if not image_bytes:
@@ -122,6 +144,8 @@ def album_palette(image_bytes):
         col = QColor.fromRgbF(b[1] / b[0], b[2] / b[0], b[3] / b[0])
         cols.append((b[4] / b[0], QColor.fromHsvF(col.hsvHueF(), min(col.hsvSaturationF(), 0.62),
                                                    max(col.valueF(), 0.95))))
+    if not cols:
+        return _neutral_palette(img)
     cols.sort(key=lambda t: t[0])   # na ordem em que aparecem na capa (esquerda → direita)
     cols = [c for _, c in cols]
     if len(cols) == 1:   # capa de uma cor só: degradê do tom claro para um tom vizinho

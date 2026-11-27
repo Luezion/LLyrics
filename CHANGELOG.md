@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.11.1
+
+### English
+- Gradient from the album cover: covers without strong colours (black and white, grey, sepia) now use the cover's own light-to-dark tones instead of the default pink/blue
+
+### Español
+- Degradado de la portada: las portadas sin colores fuertes (blanco y negro, gris, sepia) ahora usan sus propios tonos de claro a oscuro en lugar del rosa/azul por defecto
+
+### Português
+- Degradê da capa: capas sem cor forte (preto e branco, cinza, sépia) agora usam os próprios tons da capa, do claro pro escuro, em vez do rosa/azul padrão
+
 ## 1.11.0
 
 ### English
