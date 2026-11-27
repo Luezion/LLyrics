@@ -20,7 +20,7 @@ Overlay de letras sincronizadas para Windows, feito para jogar. Mostra a letra d
 - Saídas: igual à entrada, esmaecer, levada pelo vento
 - 12 layouts: linhas, **pilha**, primeira palavra em destaque (com ou sem inclinação), **arco**, **serpente**, **holofote** (uma palavra grande por vez), **espalhado**, **pôster**, **punchline**, **inclinada** e **perspectiva nas laterais**
 - Karaokê, contagem nos trechos instrumentais, linha anterior e prévia da próxima
-- Cor da capa do álbum, paletas prontas, arco-íris, cor própria, **degradê de 2 ou 3 cores**, arco-íris correndo
+- Cor da capa do álbum, paletas prontas, arco-íris, cor própria, **degradê de 2 ou 3 cores**, **degradê com as cores da capa**, arco-íris correndo
 - Movimento parado (tremer, onda, pulinho, pulsar, flutuar, balançar), brilhinhos e modo festa
 - Contorno, sombra, brilho e fundo; 12 fontes livres (Google Fonts)
 - **Meus estilos**: salve seus visuais no PC e troque entre eles com um clique (também pelo menu da bandeja)

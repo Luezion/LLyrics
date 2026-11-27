@@ -493,6 +493,8 @@ S = {
     "exit.drift": ("Blown away", "Llevada por el viento", "Levada pelo vento"),
     "colour.solid": ("Single colour", "Un color", "Uma cor"),
     "colour.gradient": ("Gradient (two colours)", "Degradado (dos colores)", "Degradê (duas cores)"),
+    "colour.album_gradient": ("Gradient from the album cover", "Degradado de la portada del álbum",
+                              "Degradê da capa do álbum"),
     "colour.gradient3": ("Gradient (three colours)", "Degradado (tres colores)", "Degradê (três cores)"),
     "colour.rainbow_flow": ("Flowing rainbow", "Arcoíris en movimiento", "Arco-íris correndo"),
     "idle.none": ("None", "Ninguno", "Nenhum"),

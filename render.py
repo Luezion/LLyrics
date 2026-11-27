@@ -82,6 +82,54 @@ def album_accent(image_bytes):
     return QColor.fromHsvF(h, min(s, 0.62), max(v, 0.95))
 
 
+ALBUM_GRADIENT = []   # cores da capa atual para o modo "Degradê da capa" (o Controller preenche)
+_GRAD_FALLBACK = ["#FF9EC7", "#C4B3FF", "#8FC9F2"]
+
+
+def album_palette(image_bytes):
+    """Até 3 cores marcantes e diferentes entre si tiradas da capa, clareadas para ler sobre o jogo."""
+    if not image_bytes:
+        return []
+    img = QImage()
+    if not img.loadFromData(image_bytes):
+        return []
+    img = img.scaled(40, 40, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+    nb = 24
+    bins = [[0.0, 0.0, 0.0, 0.0, 0.0] for _ in range(nb)]  # peso, r, g, b, posição x média
+    for y in range(img.height()):
+        for x in range(img.width()):
+            c = img.pixelColor(x, y)
+            h, sat, v = c.hsvHueF(), c.hsvSaturationF(), c.valueF()
+            if h < 0 or sat < 0.2 or v < 0.2:
+                continue
+            w = sat * sat * v
+            b = bins[int(h * nb) % nb]
+            b[0] += w
+            b[1] += c.redF() * w
+            b[2] += c.greenF() * w
+            b[3] += c.blueF() * w
+            b[4] += x * w
+    order = sorted(range(nb), key=lambda i: -bins[i][0])
+    picked = []
+    for i in order:
+        if bins[i][0] < 0.8 or len(picked) == 3:
+            break
+        if all(min(abs(i - j), nb - abs(i - j)) >= 3 for j in picked):   # ao menos ~45° de diferença
+            picked.append(i)
+    cols = []
+    for i in picked:
+        b = bins[i]
+        col = QColor.fromRgbF(b[1] / b[0], b[2] / b[0], b[3] / b[0])
+        cols.append((b[4] / b[0], QColor.fromHsvF(col.hsvHueF(), min(col.hsvSaturationF(), 0.62),
+                                                   max(col.valueF(), 0.95))))
+    cols.sort(key=lambda t: t[0])   # na ordem em que aparecem na capa (esquerda → direita)
+    cols = [c for _, c in cols]
+    if len(cols) == 1:   # capa de uma cor só: degradê do tom claro para um tom vizinho
+        h = cols[0].hsvHueF()
+        cols = [QColor.fromHsvF(h, 0.28, 1.0), cols[0], QColor.fromHsvF(h, 0.85, 0.92)]
+    return [c.name() for c in cols]
+
+
 def accent_for(cfg, album_color, line_index):
     a = cfg["accent"]
     if a == "album":
@@ -265,6 +313,13 @@ def glyph_colour(cfg, accent, i, n, now):
             return mix(accent, second, k)
         third = QColor(cfg.get("third_colour") or "#8FC9F2")
         return mix(accent, second, k * 2) if k < 0.5 else mix(second, third, (k - 0.5) * 2)
+    if mode == "album_gradient":
+        cols = [QColor(c) for c in (ALBUM_GRADIENT or _GRAD_FALLBACK)]
+        if len(cols) == 1:
+            return cols[0]
+        k = (i / (n - 1) if n > 1 else 0) * (len(cols) - 1)
+        j = min(int(k), len(cols) - 2)
+        return mix(cols[j], cols[j + 1], k - j)
     if mode == "rainbow_flow":
         return _hsl(now * 90 * float(cfg.get("idle_speed", 1.0) or 1) - i * 14, 0.72, 0.76)
     return accent

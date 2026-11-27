@@ -4,6 +4,17 @@
      Write it in three parts: "### English", "### Español" and "### Português";
      the app shows the one that matches the user's language. -->
 
+## 1.11.0
+
+### English
+- New colour mode **Gradient from the album cover**: picks up to 3 colours from the cover of the song that's playing and makes the gradient with them, changing every song
+
+### Español
+- Nuevo modo de color **Degradado de la portada del álbum**: toma hasta 3 colores de la portada de la canción que suena y hace el degradado con ellos, cambiando en cada canción
+
+### Português
+- Novo modo de cor **Degradê da capa do álbum**: pega até 3 cores da capa da música que está tocando e faz o degradê com elas, mudando a cada música
+
 ## 1.10.2
 
 ### English

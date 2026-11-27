@@ -32,7 +32,7 @@ When a new version comes out, the app shows a window to update with one click.
 - Exits: same as entrance, fade, blown away
 - 12 layouts: lines, **stack** (key words big, little words small), first word highlighted (with or without tilt), **arc**, **snake**, **spotlight** (one big word at a time), **scatter**, **poster**, **punchline**, **tilted** and **side perspective** (lines leaning on the left/right like side walls)
 - Karaoke, instrumental countdown, previous line and next line preview
-- Album cover colour, palettes, rainbow, custom colour, **2 or 3 colour gradients**, flowing rainbow
+- Album cover colour, palettes, rainbow, custom colour, **2 or 3 colour gradients**, **gradient from the album cover colours**, flowing rainbow
 - Idle motion (shake, wave, bounce, pulse, float, sway), sparkles and party mode
 - Outline, shadow, glow and background; 12 free fonts (Google Fonts)
 - **My styles**: save your looks on your PC and switch between them with one click (also from the tray menu)

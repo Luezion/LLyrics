@@ -224,6 +224,7 @@ class Controller(QObject):
             self.lines, self.windows = [], []
             self.cover = render.cover_pixmap(snap.thumb)
             self.album_color = render.album_accent(snap.thumb)
+            render.ALBUM_GRADIENT = render.album_palette(snap.thumb)
             self.cover_bytes = snap.thumb
             self._gen_variant = 0
             self.style_override = {}
@@ -232,6 +233,7 @@ class Controller(QObject):
         elif snap.thumb is not None and self.cover is None:
             self.cover = render.cover_pixmap(snap.thumb)
             self.album_color = render.album_accent(snap.thumb)
+            render.ALBUM_GRADIENT = render.album_palette(snap.thumb)
             self.cover_bytes = snap.thumb
         if self._retry_at and now > self._retry_at:
             self._retry_at = None

@@ -70,7 +70,7 @@ FONTS = [
 LAYOUTS = [(k, f"layout.{k}") for k in ("lines", "stack", "words", "words_tilted", "arc", "snake", "spotlight",
                                         "scatter", "poster", "punchline", "tilted", "perspective")]
 EXITS = [(k, f"exit.{k}") for k in ("auto", "fade", "drift")]
-COLOUR_MODES = [(k, f"colour.{k}") for k in ("solid", "gradient", "gradient3", "rainbow_flow")]
+COLOUR_MODES = [(k, f"colour.{k}") for k in ("solid", "gradient", "gradient3", "album_gradient", "rainbow_flow")]
 IDLES = [(k, f"idle.{k}") for k in ("none", "shake", "wave", "bounce", "pulse", "float", "sway")]
 PARTY_EFFECTS = [(k, f"party.{k}") for k in ("both", "notes", "sparkles")]
 POSITION_MODES = [(k, f"posmode.{k}") for k in ("fixed", "random")]
